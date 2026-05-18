@@ -163,7 +163,7 @@ export async function saveSiteSettings(
   }
 }
 
-export async function getDashboardStats(adminUid: string) {
+export async function getDashboardStats() {
   const usersSnap = await adminDb.collection("users").count().get();
   const codesSnap = await adminDb.collection("rewardCodes").count().get();
 
