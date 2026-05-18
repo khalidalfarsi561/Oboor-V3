@@ -87,7 +87,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     }
 
     const checkAdmin = async () => {
-      const isOk = await verifyServerAdmin(user.uid, user.email || "");
+      const idToken = await user.getIdToken();
+      const isOk = await verifyServerAdmin(idToken);
       setIsAdmin(isOk);
     };
     checkAdmin();

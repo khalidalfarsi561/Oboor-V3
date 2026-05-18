@@ -1,6 +1,6 @@
 "use server";
 
-import { adminDb } from "../lib/firebase/admin";
+import { adminDb, adminAuth } from "../lib/firebase/admin";
 import { revalidateTag } from "next/cache";
 
 import { GoogleGenAI } from "@google/genai";
@@ -35,13 +35,13 @@ const ALLOWED_STYLE_PROPS = [
 ];
 
 export async function generateDesignPatch(
-  adminUid: string,
+  idToken: string,
   elementId: string,
   currentStyle: any,
   userPrompt: string
 ): Promise<{ success: boolean; patch?: Record<string, any>; error?: string }> {
   try {
-    await assertAdmin(adminUid);
+    await assertAdminToken(idToken);
     const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) throw new Error("GEMINI_API_KEY is not configured on the server.");
 
@@ -77,11 +77,20 @@ Example: {"backgroundColor": "#ff0000", "borderRadius": "12px"}`;
       throw new Error("AI returned invalid JSON: " + responseText);
     }
 
-    // Validation: Only allowed keys
+    const SAFE_CSS_VALUE = /^[#\w\s.%(),-]+$/;
+
     const sanitizedPatch: Record<string, any> = {};
     for (const key in patch) {
-      if (ALLOWED_STYLE_PROPS.includes(key)) {
-        sanitizedPatch[key] = patch[key];
+      const value = patch[key];
+
+      if (
+        ALLOWED_STYLE_PROPS.includes(key) &&
+        typeof value === "string" &&
+        SAFE_CSS_VALUE.test(value) &&
+        !value.toLowerCase().includes("javascript") &&
+        !value.toLowerCase().includes("url(")
+      ) {
+        sanitizedPatch[key] = value;
       }
     }
 
@@ -92,9 +101,9 @@ Example: {"backgroundColor": "#ff0000", "borderRadius": "12px"}`;
   }
 }
 
-export async function askAdminAI(adminUid: string, userPrompt: string, history?: any[]) {
+export async function askAdminAI(idToken: string, userPrompt: string, history?: any[]) {
   try {
-    await assertAdmin(adminUid);
+    await assertAdminToken(idToken);
     const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) throw new Error("GEMINI_API_KEY not configured.");
 
@@ -111,39 +120,37 @@ export async function askAdminAI(adminUid: string, userPrompt: string, history?:
   }
 }
 
-// Cache the admin verification since it happens inside layout
-export async function verifyServerAdmin(uid: string, email: string): Promise<boolean> {
-  if (!uid || !email) return false;
-
-  const adminRef = adminDb.collection("admins").doc(uid);
-  const adminDoc = await adminRef.get();
-
-  if (adminDoc.exists) {
+export async function verifyServerAdmin(idToken: string): Promise<boolean> {
+  try {
+    await assertAdminToken(idToken);
     return true;
+  } catch {
+    return false;
   }
-
-  return false;
 }
 
-async function assertAdmin(uid: string) {
-  if (!uid) throw new Error("غير مصرح.");
+async function assertAdminToken(idToken: string): Promise<string> {
+  if (!idToken) throw new Error("غير مصرح.");
 
-  const adminDoc = await adminDb.collection("admins").doc(uid).get();
+  const decodedToken = await adminAuth.verifyIdToken(idToken);
+  const adminDoc = await adminDb.collection("admins").doc(decodedToken.uid).get();
 
   if (!adminDoc.exists) {
     throw new Error("غير مصرح.");
   }
+
+  return decodedToken.uid;
 }
 
 import { LayoutSectionId, DesignPatch } from "../lib/design";
 
 export async function saveSiteSettings(
-  adminUid: string,
+  idToken: string,
   layoutOrder: LayoutSectionId[],
   designSpecs?: Record<string, DesignPatch>
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    await assertAdmin(adminUid);
+    await assertAdminToken(idToken);
     const data: {
       order: LayoutSectionId[];
       updatedAt: Date;
@@ -173,13 +180,9 @@ export async function getDashboardStats() {
   };
 }
 
-export async function updateItemStock(
-  adminUid: string,
-  itemId: number,
-  newStock: number
-) {
+export async function updateItemStock(idToken: string, itemId: number, newStock: number) {
   try {
-    await assertAdmin(adminUid);
+    await assertAdminToken(idToken);
     const stockDocs = await adminDb
       .collection("storeItems")
       .where("itemId", "==", itemId)

@@ -38,7 +38,8 @@ User Admin Query: ${userPrompt}`;
           throw new Error("غير مصرح.");
         }
 
-        const res = await askAdminAI(user.uid, fullPrompt, []);
+        const idToken = await user.getIdToken();
+        const res = await askAdminAI(idToken, fullPrompt, []);
 
         if (res.success && res.text) {
           setMessages((prev) => [...prev, { role: "ai", text: res.text! }]);

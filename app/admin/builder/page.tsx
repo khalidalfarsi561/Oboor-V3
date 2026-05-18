@@ -66,7 +66,8 @@ export default function VisualBuilder() {
     }
     setSaving(true);
     toast.loading("يتم حفظ التصميم الجديد...", { id: "builder" });
-    const res = await saveSiteSettings(user.uid, items, design);
+    const idToken = await user.getIdToken();
+    const res = await saveSiteSettings(idToken, items, design);
     if (res.success) {
       toast.success("تم بنجاح! الموقع الآن يرتدي حلته الجديدة.", { id: "builder" });
     } else {
@@ -92,12 +93,9 @@ export default function VisualBuilder() {
           return;
         }
 
-        const res = await generateDesignPatch(
-          user.uid,
-          currentId,
-          currentStyle,
-          aiPrompt
-        );
+        const idToken = await user.getIdToken();
+
+        const res = await generateDesignPatch(idToken, currentId, currentStyle, aiPrompt);
 
         if (res.success && res.patch) {
           setDesign((prev) => ({

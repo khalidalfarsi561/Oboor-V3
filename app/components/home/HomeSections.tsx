@@ -37,7 +37,7 @@ export function HomeSections({
 }: HomeSectionsProps) {
   const getSectionStyle = (id: string) => mapDesignPatchToStyle(design[id] || {});
 
-  const componentsMap: Record<LayoutSectionId, React.ReactNode> = {
+  const componentsMap: Partial<Record<LayoutSectionId, React.ReactNode>> = {
     hero: (
       <HomeHero key="hero" user={user} signIn={signIn} style={getSectionStyle("hero")} />
     ),
@@ -64,5 +64,5 @@ export function HomeSections({
     ),
   };
 
-  return <>{layoutOrder.map((sectionId) => componentsMap[sectionId])}</>;
+  return <>{layoutOrder.map((sectionId) => componentsMap[sectionId] ?? null)}</>;
 }
