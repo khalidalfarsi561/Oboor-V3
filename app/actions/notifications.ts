@@ -1,9 +1,18 @@
 "use server";
 
-import { adminDb } from "../lib/firebase/admin";
+import { adminDb, adminAuth } from "../lib/firebase/admin";
 
-export async function getUserNotifications(userId: string) {
-  if (!userId) return [];
+async function getUidFromToken(idToken: string): Promise<string> {
+  if (!idToken) throw new Error("غير مصرح.");
+  const decoded = await adminAuth.verifyIdToken(idToken);
+  return decoded.uid;
+}
+
+export async function getUserNotifications(idToken: string) {
+  if (!idToken) return [];
+
+  const userId = await getUidFromToken(idToken);
+
   try {
     const snap = await adminDb
       .collection("userNotifications")
@@ -23,8 +32,11 @@ export async function getUserNotifications(userId: string) {
   }
 }
 
-export async function markNotificationAsRead(userId: string, notificationId: string) {
-  if (!userId || !notificationId) return { success: false };
+export async function markNotificationAsRead(idToken: string, notificationId: string) {
+  if (!idToken || !notificationId) return { success: false };
+
+  const userId = await getUidFromToken(idToken);
+
   try {
     const ref = adminDb.collection("userNotifications").doc(notificationId);
     const snap = await ref.get();
