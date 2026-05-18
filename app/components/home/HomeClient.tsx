@@ -41,7 +41,8 @@ export function HomeClient({
 
     setClaiming(true);
     try {
-      const result = await claimRewardCode(user.uid, code);
+      const idToken = await user.getIdToken();
+      const result = await claimRewardCode(idToken, code);
 
       if (!result.success || result.error) {
         setErrorMsg(result.error || "حدث خطأ غير متوقع أثناء معالجة الكود.");

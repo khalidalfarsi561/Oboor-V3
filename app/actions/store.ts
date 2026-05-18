@@ -1,8 +1,14 @@
 "use server";
 
 import { unstable_cache } from "next/cache";
-import { adminDb } from "../lib/firebase/admin";
+import { adminDb, adminAuth } from "../lib/firebase/admin";
 import { FieldValue } from "firebase-admin/firestore";
+
+async function getUidFromToken(idToken: string): Promise<string> {
+  if (!idToken) throw new Error("غير مصرح.");
+  const decoded = await adminAuth.verifyIdToken(idToken);
+  return decoded.uid;
+}
 
 export const getStoreStock = unstable_cache(
   async () => {
@@ -24,12 +30,12 @@ export const getStoreStock = unstable_cache(
 );
 
 export async function purchaseItem(
-  userId: string,
+  idToken: string,
   itemId: number,
   itemName: string,
   price: number
 ) {
-  if (!userId) throw new Error("يرجى تسجيل الدخول أولاً لتتمكن من الشراء.");
+  const userId = await getUidFromToken(idToken);
 
   await adminDb.runTransaction(async (transaction) => {
     const userRef = adminDb.collection("users").doc(userId);
@@ -70,8 +76,8 @@ export async function purchaseItem(
   });
 }
 
-export async function toggleStockNotification(userId: string, itemId: number) {
-  if (!userId) throw new Error("يرجى تسجيل الدخول.");
+export async function toggleStockNotification(idToken: string, itemId: number) {
+  const userId = await getUidFromToken(idToken);
 
   const docId = `${userId}_${itemId}`;
   const notifyRef = adminDb.collection("stockNotifications").doc(docId);
@@ -97,8 +103,10 @@ export async function getSubscriptionStatus(userId: string, itemId: number) {
   return snap.exists;
 }
 
-export async function getStockNotificationMap(userId: string, itemIds: number[]) {
-  if (!userId || !itemIds.length) return {};
+export async function getStockNotificationMap(idToken: string, itemIds: number[]) {
+  if (!idToken || !itemIds.length) return {};
+
+  const userId = await getUidFromToken(idToken);
 
   try {
     const snap = await adminDb

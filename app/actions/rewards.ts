@@ -1,6 +1,6 @@
 "use server";
 
-import { adminDb } from "../lib/firebase/admin";
+import { adminDb, adminAuth } from "../lib/firebase/admin";
 import { FieldValue } from "firebase-admin/firestore";
 import { headers, cookies } from "next/headers";
 
@@ -67,11 +67,19 @@ async function detectVPN(ip: string): Promise<boolean> {
   }
 }
 
+async function getUidFromToken(idToken: string): Promise<string> {
+  if (!idToken) throw new Error("غير مصرح.");
+  const decoded = await adminAuth.verifyIdToken(idToken);
+  return decoded.uid;
+}
+
 export async function initiateClaimIntent(
-  userId: string,
+  idToken: string,
   linkId: string
 ): Promise<{ success: boolean; error?: string }> {
-  if (!userId || !linkId) return { success: false, error: "Missing parameters" };
+  if (!idToken || !linkId) return { success: false, error: "Missing parameters" };
+
+  const userId = await getUidFromToken(idToken);
 
   try {
     const { ip, deviceId } = await getClientFraudData();
@@ -116,10 +124,12 @@ export async function initiateClaimIntent(
 }
 
 export async function generateRewardCode(
-  userId: string,
+  idToken: string,
   linkId: string
 ): Promise<{ success: boolean; code?: string; error?: string }> {
-  if (!userId || !linkId) return { success: false, error: "Missing parameters" };
+  if (!idToken || !linkId) return { success: false, error: "Missing parameters" };
+
+  const userId = await getUidFromToken(idToken);
 
   try {
     const generatedCode = await adminDb.runTransaction(async (transaction) => {
@@ -181,15 +191,22 @@ export async function generateRewardCode(
         }
       }
 
-      const randomCode = generateRandomCode();
-      const codeRef = adminDb.collection("rewardCodes").doc(randomCode);
-      const codeSnap = await transaction.get(codeRef);
+      let randomCode = "";
+      let codeRef;
 
-      if (codeSnap.exists) {
-        throw new Error("حدث تضارب، يرجى المحاولة مرة أخرى");
+      for (let i = 0; i < 5; i++) {
+        randomCode = generateRandomCode();
+        codeRef = adminDb.collection("rewardCodes").doc(randomCode);
+        const codeSnap = await transaction.get(codeRef);
+
+        if (!codeSnap.exists) break;
+
+        if (i === 4) {
+          throw new Error("تعذر توليد كود فريد، يرجى المحاولة مرة أخرى");
+        }
       }
 
-      transaction.set(codeRef, {
+      transaction.set(codeRef!, {
         code: randomCode,
         amount: 1,
         isUsed: false,
@@ -229,10 +246,12 @@ export async function generateRewardCode(
 }
 
 export async function claimRewardCode(
-  userId: string,
+  idToken: string,
   codeStr: string
 ): Promise<{ success: boolean; amount?: number; error?: string }> {
-  if (!userId || !codeStr) return { success: false, error: "Missing parameters" };
+  if (!idToken || !codeStr) return { success: false, error: "Missing parameters" };
+
+  const userId = await getUidFromToken(idToken);
   const parsedCode = codeStr.trim().toUpperCase();
   if (parsedCode.length !== 8) return { success: false, error: "Invalid code" };
 

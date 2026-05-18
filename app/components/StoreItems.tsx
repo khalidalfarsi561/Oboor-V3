@@ -28,17 +28,20 @@ export const StoreItems = memo(function StoreItems({
 
   useEffect(() => {
     if (user) {
-      getStockNotificationMap(
-        user.uid,
-        ITEMS.map((it) => it.id)
-      ).then(setNotificationMap);
+      user.getIdToken().then((idToken) => {
+        getStockNotificationMap(
+          idToken,
+          ITEMS.map((it) => it.id)
+        ).then(setNotificationMap);
+      });
     }
   }, [user]);
 
   const onToggleNotify = async (itemId: number) => {
     if (!user) return;
     try {
-      const res = await toggleStockNotification(user.uid, itemId);
+      const idToken = await user.getIdToken();
+      const res = await toggleStockNotification(idToken, itemId);
       setNotificationMap((prev) => ({ ...prev, [itemId]: !!res.subscribed }));
       if (res.subscribed) {
         toast.success("سنقوم بإعلامك فور توفر المنتج مرة أخرى!");
@@ -68,7 +71,8 @@ export const StoreItems = memo(function StoreItems({
 
     setPurchasingId(item.id);
     try {
-      await purchaseItem(user.uid, item.id, item.name, item.price);
+      const idToken = await user.getIdToken();
+      await purchaseItem(idToken, item.id, item.name, item.price);
 
       toast.success(`مبروك! تم شراء "${item.name}" بنجاح.`, {
         icon: <CheckCircle2 className="h-5 w-5 text-green-500" />,
