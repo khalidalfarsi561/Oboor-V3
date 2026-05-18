@@ -34,7 +34,7 @@ export function StoreItemCard({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.1 }}
-      className="group ui-reduced-motion relative flex min-h-[340px] flex-col overflow-hidden rounded-[28px] border border-slate-100 bg-white p-6 shadow-[0_4px_20px_rgb(0,0,0,0.03)] transition-all hover:-translate-y-1 hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] sm:min-h-[360px] sm:p-8"
+      className="group ui-reduced-motion relative flex min-h-[300px] flex-col overflow-hidden rounded-[28px] border border-slate-100 bg-white p-6 shadow-[0_4px_20px_rgb(0,0,0,0.03)] transition-all hover:-translate-y-1 hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] sm:min-h-[360px] sm:p-8"
       aria-busy={isPurchasing}
       aria-disabled={isOutOfStock}
     >

@@ -35,7 +35,7 @@ export function BuilderPromptBar({
             exit={{ y: 50, opacity: 0 }}
             className="pointer-events-auto w-full max-w-2xl"
           >
-            <div className="flex items-center gap-3 rounded-[32px] border border-slate-700 bg-slate-900/90 p-2 shadow-2xl ring-8 ring-slate-950/20 backdrop-blur-2xl">
+            <div className="flex flex-col items-stretch gap-3 rounded-[24px] border border-slate-700 bg-slate-900/90 p-2 shadow-2xl ring-8 ring-slate-950/20 backdrop-blur-2xl sm:flex-row sm:items-center sm:rounded-[32px]">
               <div className="flex shrink-0 items-center gap-2 rounded-full bg-red-600 px-4 py-2 text-xs font-bold whitespace-nowrap text-white">
                 <Sparkles className="h-3 w-3 animate-pulse" />
                 تعديل {selectedLabel}

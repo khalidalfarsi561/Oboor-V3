@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { Wallet, LogIn, LogOut, Gift } from "lucide-react";
 import Link from "next/link";
@@ -24,7 +25,7 @@ export function HomeHeader({ user, balance, signIn, signOut, design }: HomeHeade
 
   return (
     <header
-      className="group/nav mb-8 flex flex-row items-center justify-between px-4 sm:px-0 md:mb-16"
+      className="group/nav mb-8 flex flex-row items-center justify-between gap-3 px-4 sm:px-0 md:mb-16"
       style={getStyle("nav")}
     >
       {/* Sign In Section - Exact match for image for mobile */}
@@ -123,11 +124,17 @@ export function HomeHeader({ user, balance, signIn, signOut, design }: HomeHeade
         {/* Mobile Logo (Exactly like image) */}
         <div className="flex items-center md:hidden">
           <Link href="/">
-            <img
+            <Image
               src={LOGO_URL}
               alt="Logo"
-              style={{ width: "243.6px", height: "117.2px", mixBlendMode: "multiply" }}
-              className="max-w-none bg-transparent object-contain"
+              width={244}
+              height={117}
+              style={{
+                width: "clamp(150px, 55vw, 244px)",
+                height: "auto",
+                mixBlendMode: "multiply",
+              }}
+              className="bg-transparent object-contain"
               referrerPolicy="no-referrer"
             />
           </Link>

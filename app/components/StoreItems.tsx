@@ -87,7 +87,7 @@ export const StoreItems = memo(function StoreItems({
 
   return (
     <section style={style}>
-      <div className="mb-10 flex items-center justify-between">
+      <div className="mb-6 flex items-center justify-between px-1 sm:mb-10 sm:px-0">
         <h2 className="text-2xl font-bold tracking-tight text-slate-900">
           المنتجات المتوفرة
         </h2>

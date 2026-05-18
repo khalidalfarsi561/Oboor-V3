@@ -22,7 +22,7 @@ export const HomeHero = ({
   >
     <div className="pointer-events-none absolute -top-32 -left-32 h-96 w-96 rounded-full bg-blue-50 blur-3xl" />
 
-    <div className="relative z-10 flex max-w-2xl flex-col items-center justify-between gap-8 text-center md:flex-row md:text-right">
+    <div className="relative z-10 flex w-full flex-col items-center justify-between gap-8 text-center md:flex-row md:text-right">
       <div>
         <h2 className="mb-3 text-2xl font-bold tracking-tight text-slate-900 md:text-3xl">
           اربح رصيداً مجانياً يومياً!

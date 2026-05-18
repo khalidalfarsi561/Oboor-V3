@@ -88,7 +88,7 @@ export function BuilderPreview({
   };
 
   return (
-    <div className="scrollbar-hide flex flex-1 items-start justify-center overflow-y-auto p-12">
+    <div className="scrollbar-hide flex flex-1 items-start justify-center overflow-y-auto p-4 sm:p-8 lg:p-12">
       <motion.div
         layout
         className={`relative min-h-screen origin-top bg-white shadow-[0_0_100px_rgba(0,0,0,0.5)] transition-all duration-700 ${
