@@ -20,7 +20,7 @@ export function useUserNotifications(userId: string | undefined) {
 
   useEffect(() => {
     const q = query(
-      collection(db, "notifications"),
+      collection(db, "userNotifications"),
       where("userId", "==", userId),
       orderBy("createdAt", "desc"),
       limit(20)
