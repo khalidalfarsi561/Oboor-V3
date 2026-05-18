@@ -42,7 +42,8 @@ export const HomeHero = ({
             toast.loading("جاري تحضير الرابط السري...", { id: "intent-toast" });
             try {
               const { initiateClaimIntent } = await import("../../actions/rewards");
-              const res = await initiateClaimIntent(user.uid, "daily_link_1");
+              const idToken = await user.getIdToken();
+              const res = await initiateClaimIntent(idToken, "daily_link_1");
               if (res.success) {
                 toast.success("تم التوجيه نحو الرابط!", { id: "intent-toast" });
                 window.location.href = "https://short-jambo.ink/Gate";
