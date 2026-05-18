@@ -6,12 +6,13 @@ import { revalidateTag } from "next/cache";
 import { GoogleGenAI } from "@google/genai";
 
 const ALLOWED_STYLE_PROPS = [
-  "backgroundColor", "color", "padding", "paddingTop", "paddingBottom", "paddingLeft", "paddingRight",
+  "backgroundColor", "color",
+  "padding", "paddingTop", "paddingBottom", "paddingLeft", "paddingRight",
   "margin", "marginTop", "marginBottom", "marginLeft", "marginRight",
   "borderRadius", "borderWidth", "borderColor", "borderStyle",
   "fontSize", "fontWeight", "letterSpacing", "lineHeight", "textAlign",
-  "boxShadow", "opacity", "transform", "transition", "width", "height",
-  "display", "flexDirection", "alignItems", "justifyContent", "gap"
+  "boxShadow",
+  "flexDirection", "alignItems", "justifyContent", "gap"
 ];
 
 export async function generateDesignPatch(
@@ -92,27 +93,35 @@ export async function askAdminAI(userPrompt: string, history?: any[]) {
 export async function verifyServerAdmin(uid: string, email: string): Promise<boolean> {
   if (!uid || !email) return false;
   
-  const adminRef = adminDb.collection('admins').doc(uid);
+  const adminRef = adminDb.collection("admins").doc(uid);
   const adminDoc = await adminRef.get();
   
-  // Concrete security: only an existing doc in 'admins' allows entry.
-  // BUT to bootstrap the owner (you), if the email is 'khalidalfarsi1995@gmail.com' 
-  // and there's no admin doc yet, we create it to lock it down to you.
   if (adminDoc.exists) {
-    return true;
-  } else if (email === "khalidalfarsi1995@gmail.com") {
-    // Bootstrap master admin
-    await adminRef.set({ email, createdAt: new Date() });
     return true;
   }
   
   return false;
 }
 
+async function assertAdmin(uid: string) {
+  if (!uid) throw new Error("غير مصرح.");
+  
+  const adminDoc = await adminDb.collection("admins").doc(uid).get();
+  
+  if (!adminDoc.exists) {
+    throw new Error("غير مصرح.");
+  }
+}
+
 import { LayoutSectionId, DesignPatch } from "../lib/design";
 
-export async function saveSiteSettings(layoutOrder: LayoutSectionId[], designSpecs?: Record<string, DesignPatch>): Promise<{success: boolean; error?: string}> {
+export async function saveSiteSettings(
+  adminUid: string,
+  layoutOrder: LayoutSectionId[],
+  designSpecs?: Record<string, DesignPatch>
+): Promise<{success: boolean; error?: string}> {
   try {
+    await assertAdmin(adminUid);
     const data: { order: LayoutSectionId[], updatedAt: Date, design?: Record<string, DesignPatch> } = {
       order: layoutOrder,
       updatedAt: new Date(),

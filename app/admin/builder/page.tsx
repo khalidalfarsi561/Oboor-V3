@@ -14,6 +14,7 @@ import { LayoutSectionId, DesignPatch, SiteSettings } from "../../lib/design";
 import { FocusWrapper } from "../../components/admin/FocusWrapper";
 import { BuilderPreview } from "../../components/admin/BuilderPreview";
 import { BuilderPromptBar } from "../../components/admin/BuilderPromptBar";
+import { useAuth } from "../../components/AuthProvider";
 
 const CONTROL_ELEMENTS = [
   { id: "nav", label: "شريط التنقل (Navbar)", type: "container", area: "header" },
@@ -30,6 +31,7 @@ const CONTROL_ELEMENTS = [
 ];
 
 export default function VisualBuilder() {
+  const { user } = useAuth();
   const [items, setItems] = useState<LayoutSectionId[]>(["hero", "claim", "store"]);
   const [design, setDesign] = useState<Record<string, DesignPatch>>({});
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -52,9 +54,13 @@ export default function VisualBuilder() {
   }, []);
 
   const handleSave = async () => {
+    if (!user) {
+  toast.error("يرجى تسجيل الدخول.");
+  return;
+}
     setSaving(true);
     toast.loading("يتم حفظ التصميم الجديد...", { id: "builder" });
-    const res = await saveSiteSettings(items, design);
+    const res = await saveSiteSettings(user.uid, items, design);
     if (res.success) {
       toast.success("تم بنجاح! الموقع الآن يرتدي حلته الجديدة.", { id: "builder" });
     } else {
