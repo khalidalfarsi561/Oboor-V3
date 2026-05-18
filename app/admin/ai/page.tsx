@@ -11,7 +11,7 @@ export default function AiAssistant() {
   const [messages, setMessages] = useState<{ role: "user" | "ai"; text: string }[]>([
     {
       role: "ai",
-      text: "أهلاً أيها القائد! أنا مساعدك المدعوم بأقوى النماذج في الهندسة العكسية. أعرف بنية التخزين، المكونات، وواجهات الموقع. اسألني عن حالة النظام أو اطلب مني التعديلات!",
+      text: "أهلاً! أنا مساعدك التقني لإرشادك في إدارة المشروع وتحليل المشاكل واقتراح التحسينات الآمنة.",
     },
   ]);
   const [input, setInput] = useState("");
@@ -63,7 +63,7 @@ User Admin Query: ${userPrompt}`;
           <Bot className="h-10 w-10 text-red-500" />
           مساعد النظام الخبير
         </h1>
-        <p className="text-slate-400">موصول مباشرة بقاعدة البيانات وكود المصدر.</p>
+        <p className="text-slate-400">مساعد تقني لتحليل المشروع واقتراح تحسينات آمنة.</p>
       </header>
 
       <div className="flex flex-1 flex-col overflow-hidden rounded-[32px] border border-slate-800 bg-slate-900 p-6 shadow-2xl lg:p-8">

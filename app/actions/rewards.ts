@@ -18,6 +18,7 @@ async function getClientFraudData() {
   const headersList = await headers();
   // Vercel and edge providers set x-forwarded-for
   const xForwardedFor = headersList.get("x-forwarded-for");
+  const userAgent = headersList.get("user-agent") || "unknown";
   let ip = "unknown";
   if (xForwardedFor) {
     ip = xForwardedFor.split(",")[0].trim();
@@ -38,7 +39,7 @@ async function getClientFraudData() {
     });
   }
 
-  return { ip, deviceId };
+  return { ip, deviceId, userAgent };
 }
 
 async function detectVPN(ip: string): Promise<boolean> {
@@ -82,7 +83,7 @@ export async function initiateClaimIntent(
   const userId = await getUidFromToken(idToken);
 
   try {
-    const { ip, deviceId } = await getClientFraudData();
+    const { ip, deviceId, userAgent } = await getClientFraudData();
 
     if (await detectVPN(ip)) {
       return { success: false, error: "VPN_DETECTED" };
@@ -115,6 +116,7 @@ export async function initiateClaimIntent(
       status: "pending",
       ip,
       deviceId,
+      userAgent,
     });
     return { success: true };
   } catch (error: any) {
@@ -272,11 +274,9 @@ export async function claimRewardCode(
       const userRef = adminDb.collection("users").doc(userId);
       const userSnap = await transaction.get(userRef);
 
-      let newBalance = codeData?.amount || 1;
-      if (userSnap.exists) {
-        newBalance += userSnap.data()?.balance || 0;
-      } else {
-        // Should be bootstrapped, but fallback just in case
+      const amountToAdd = codeData?.amount || 1;
+
+      if (!userSnap.exists) {
         transaction.set(userRef, {
           uid: userId,
           balance: 0,
@@ -290,10 +290,10 @@ export async function claimRewardCode(
       });
 
       transaction.update(userRef, {
-        balance: newBalance,
+        balance: FieldValue.increment(amountToAdd),
       });
 
-      return codeData?.amount || 1;
+      return amountToAdd;
     });
 
     return { success: true, amount };
