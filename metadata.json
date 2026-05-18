@@ -1,0 +1,6 @@
+{
+  "name": "Digital Rewards Store",
+  "description": "A digital rewards store where users can log in, redeem secret tokens for coins, and browse items.",
+  "requestFramePermissions": [],
+  "majorCapabilities": []
+}
