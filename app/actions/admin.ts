@@ -92,8 +92,9 @@ Example: {"backgroundColor": "#ff0000", "borderRadius": "12px"}`;
   }
 }
 
-export async function askAdminAI(userPrompt: string, history?: any[]) {
+export async function askAdminAI(adminUid: string, userPrompt: string, history?: any[]) {
   try {
+    await assertAdmin(adminUid);
     const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) throw new Error("GEMINI_API_KEY not configured.");
 
@@ -162,7 +163,7 @@ export async function saveSiteSettings(
   }
 }
 
-export async function getDashboardStats() {
+export async function getDashboardStats(adminUid: string) {
   const usersSnap = await adminDb.collection("users").count().get();
   const codesSnap = await adminDb.collection("rewardCodes").count().get();
 
@@ -172,8 +173,13 @@ export async function getDashboardStats() {
   };
 }
 
-export async function updateItemStock(itemId: number, newStock: number) {
+export async function updateItemStock(
+  adminUid: string,
+  itemId: number,
+  newStock: number
+) {
   try {
+    await assertAdmin(adminUid);
     const stockDocs = await adminDb
       .collection("storeItems")
       .where("itemId", "==", itemId)

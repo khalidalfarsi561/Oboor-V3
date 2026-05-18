@@ -4,8 +4,10 @@ import React, { useState, useTransition } from "react";
 import { Loader2, Send, Bot, User } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { askAdminAI } from "../../actions/admin";
+import { useAuth } from "../../components/AuthProvider";
 
 export default function AiAssistant() {
+  const { user } = useAuth();
   const [messages, setMessages] = useState<{ role: "user" | "ai"; text: string }[]>([
     {
       role: "ai",
@@ -32,7 +34,11 @@ Website Context: Next.js Vercel app matching Firestore rules. The Admin UI has v
 Current Status: ${context}
 User Admin Query: ${userPrompt}`;
 
-        const res = await askAdminAI(fullPrompt, []);
+        if (!user) {
+          throw new Error("غير مصرح.");
+        }
+
+        const res = await askAdminAI(user.uid, fullPrompt, []);
 
         if (res.success && res.text) {
           setMessages((prev) => [...prev, { role: "ai", text: res.text! }]);
