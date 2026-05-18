@@ -59,7 +59,8 @@ export function SecretClient({ linkId, token }: { linkId: string; token: string 
 
     try {
       setStatus("checking");
-      const result = await generateRewardCode(user.uid, linkId);
+      const idToken = await user.getIdToken();
+      const result = await generateRewardCode(idToken, linkId);
 
       if (!result.success || result.error) {
         setStatus("denied");
@@ -208,7 +209,7 @@ export function SecretClient({ linkId, token }: { linkId: string; token: string 
                   <AlertCircle className="h-10 w-10 text-red-500" strokeWidth={2.5} />
                 </div>
                 <h1 className="mb-4 text-2xl font-bold text-slate-900">تم الرفض</h1>
-                <p className="mb-6 rounded-xl bg-red-50 p-4 text-base leading-relaxed font-medium text-balance break-words text-red-600 text-slate-600 sm:text-lg">
+                <p className="mb-6 rounded-xl bg-red-50 p-4 text-base leading-relaxed font-medium text-balance break-words text-red-600 sm:text-lg">
                   {errorMessage}
                 </p>
 
