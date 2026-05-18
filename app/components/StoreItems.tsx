@@ -6,17 +6,32 @@ import { CheckCircle2 } from "lucide-react";
 import { useAuth } from "./AuthProvider";
 import { toast } from "sonner";
 import { ITEMS, StoreItem } from "../lib/data";
-import { purchaseItem, getStockNotificationMap, toggleStockNotification } from "../actions/store";
+import {
+  purchaseItem,
+  getStockNotificationMap,
+  toggleStockNotification,
+} from "../actions/store";
 import { StoreItemCard, StoreItemSkeleton } from "./StoreItemCard";
 
-export const StoreItems = memo(function StoreItems({ balance, stockMap, style = {} }: { balance: number | null, stockMap: Record<number, number> | null, style?: CSSProperties }) {
+export const StoreItems = memo(function StoreItems({
+  balance,
+  stockMap,
+  style = {},
+}: {
+  balance: number | null;
+  stockMap: Record<number, number> | null;
+  style?: CSSProperties;
+}) {
   const { user } = useAuth();
   const [purchasingId, setPurchasingId] = useState<number | null>(null);
   const [notificationMap, setNotificationMap] = useState<Record<number, boolean>>({});
 
   useEffect(() => {
     if (user) {
-      getStockNotificationMap(user.uid, ITEMS.map(it => it.id)).then(setNotificationMap);
+      getStockNotificationMap(
+        user.uid,
+        ITEMS.map((it) => it.id)
+      ).then(setNotificationMap);
     }
   }, [user]);
 
@@ -24,7 +39,7 @@ export const StoreItems = memo(function StoreItems({ balance, stockMap, style = 
     if (!user) return;
     try {
       const res = await toggleStockNotification(user.uid, itemId);
-      setNotificationMap(prev => ({ ...prev, [itemId]: !!res.subscribed }));
+      setNotificationMap((prev) => ({ ...prev, [itemId]: !!res.subscribed }));
       if (res.subscribed) {
         toast.success("سنقوم بإعلامك فور توفر المنتج مرة أخرى!");
       } else {
@@ -46,7 +61,7 @@ export const StoreItems = memo(function StoreItems({ balance, stockMap, style = 
     }
     if (balance === null || balance < item.price) {
       toast.error("عذراً، رصيدك غير كافٍ لإتمام عملية الشراء.", {
-        icon: <div className="text-red-500 font-bold">X</div>
+        icon: <div className="font-bold text-red-500">X</div>,
       });
       return;
     }
@@ -56,7 +71,7 @@ export const StoreItems = memo(function StoreItems({ balance, stockMap, style = 
       await purchaseItem(user.uid, item.id, item.name, item.price);
 
       toast.success(`مبروك! تم شراء "${item.name}" بنجاح.`, {
-        icon: <CheckCircle2 className="text-green-500 w-5 h-5" />
+        icon: <CheckCircle2 className="h-5 w-5 text-green-500" />,
       });
     } catch (err: unknown) {
       console.error("Purchase error:", err);
@@ -68,32 +83,32 @@ export const StoreItems = memo(function StoreItems({ balance, stockMap, style = 
 
   return (
     <section style={style}>
-      <div className="flex items-center justify-between mb-10">
-        <h2 className="text-2xl font-bold text-slate-900 tracking-tight">المنتجات المتوفرة</h2>
+      <div className="mb-10 flex items-center justify-between">
+        <h2 className="text-2xl font-bold tracking-tight text-slate-900">
+          المنتجات المتوفرة
+        </h2>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
         <AnimatePresence mode="popLayout">
-          {!stockMap ? (
-            Array.from({ length: ITEMS.length }).map((_, i) => (
-              <StoreItemSkeleton key={`skeleton-${i}`} />
-            ))
-          ) : (
-            ITEMS.map((item, i) => (
-              <StoreItemCard 
-                key={item.id}
-                item={item}
-                stock={stockMap[item.id] ?? 0}
-                purchasingId={purchasingId}
-                onBuy={handleBuy}
-                index={i}
-                isSubscribed={!!notificationMap[item.id]}
-                onToggleNotify={() => onToggleNotify(item.id)}
-              />
-            ))
-          )}
+          {!stockMap
+            ? Array.from({ length: ITEMS.length }).map((_, i) => (
+                <StoreItemSkeleton key={`skeleton-${i}`} />
+              ))
+            : ITEMS.map((item, i) => (
+                <StoreItemCard
+                  key={item.id}
+                  item={item}
+                  stock={stockMap[item.id] ?? 0}
+                  purchasingId={purchasingId}
+                  onBuy={handleBuy}
+                  index={i}
+                  isSubscribed={!!notificationMap[item.id]}
+                  onToggleNotify={() => onToggleNotify(item.id)}
+                />
+              ))}
         </AnimatePresence>
-    </div>
-  </section>
+      </div>
+    </section>
   );
 });

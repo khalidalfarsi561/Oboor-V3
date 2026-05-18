@@ -26,23 +26,27 @@ export function useUserNotifications(userId: string | undefined) {
       limit(20)
     );
 
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const data = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      })) as SystemNotification[];
-      
-      setNotifications(data);
-      setLoading(false);
-    }, (error) => {
-      console.error("Notifications Subscription Error:", error);
-      setLoading(false);
-    });
+    const unsubscribe = onSnapshot(
+      q,
+      (snapshot) => {
+        const data = snapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        })) as SystemNotification[];
+
+        setNotifications(data);
+        setLoading(false);
+      },
+      (error) => {
+        console.error("Notifications Subscription Error:", error);
+        setLoading(false);
+      }
+    );
 
     return () => unsubscribe();
   }, [userId]);
 
-  const unreadCount = notifications.filter(n => !n.read).length;
+  const unreadCount = notifications.filter((n) => !n.read).length;
 
   return { notifications, unreadCount, loading };
 }

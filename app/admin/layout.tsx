@@ -4,7 +4,16 @@ import React, { useEffect, useState } from "react";
 import { useAuth } from "../components/AuthProvider";
 import { verifyServerAdmin } from "../actions/admin";
 import { useRouter, usePathname } from "next/navigation";
-import { Loader2, ShieldX, Menu, X, Home, Globe, Cpu, LayoutDashboard } from "lucide-react";
+import {
+  Loader2,
+  ShieldX,
+  Menu,
+  X,
+  Home,
+  Globe,
+  Cpu,
+  LayoutDashboard,
+} from "lucide-react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -22,39 +31,39 @@ const SidebarContent = ({ pathname }: SidebarContentProps) => {
   return (
     <>
       <div className="flex flex-col items-center py-8">
-        <div className="w-16 h-16 bg-gradient-to-tr from-red-600 to-orange-500 rounded-2xl flex items-center justify-center shadow-lg shadow-red-600/20 mb-4">
-          <span className="font-black text-2xl text-white">S^</span>
+        <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-tr from-red-600 to-orange-500 shadow-lg shadow-red-600/20">
+          <span className="text-2xl font-black text-white">S^</span>
         </div>
-        <h2 className="text-xl font-bold text-white tracking-widest">اللوحة الخارقة</h2>
+        <h2 className="text-xl font-bold tracking-widest text-white">اللوحة الخارقة</h2>
       </div>
-      
-      <nav className="w-full flex-1 px-4 flex flex-col gap-2 mt-4">
+
+      <nav className="mt-4 flex w-full flex-1 flex-col gap-2 px-4">
         {navLinks.map((link) => {
           const Icon = link.icon;
           const isActive = pathname === link.href;
           return (
-            <Link 
+            <Link
               key={link.href}
-              href={link.href} 
-              className={`px-4 py-3 rounded-xl flex items-center gap-3 transition-all ${
-                isActive 
-                  ? "bg-red-600/10 text-red-400 border border-red-600/20" 
-                  : "text-slate-400 hover:text-white hover:bg-slate-800/50"
+              href={link.href}
+              className={`flex items-center gap-3 rounded-xl px-4 py-3 transition-all ${
+                isActive
+                  ? "border border-red-600/20 bg-red-600/10 text-red-400"
+                  : "text-slate-400 hover:bg-slate-800/50 hover:text-white"
               }`}
             >
-              <Icon className="w-5 h-5 flex-shrink-0" />
-              <span className="font-medium text-sm">{link.label}</span>
+              <Icon className="h-5 w-5 flex-shrink-0" />
+              <span className="text-sm font-medium">{link.label}</span>
             </Link>
           );
         })}
       </nav>
-      
-      <div className="mt-auto p-4 flex flex-col gap-2">
-        <Link 
-          href="/" 
-          className="flex items-center justify-center gap-2 px-4 py-3 bg-slate-800 rounded-xl text-sm font-medium hover:bg-slate-700 transition"
+
+      <div className="mt-auto flex flex-col gap-2 p-4">
+        <Link
+          href="/"
+          className="flex items-center justify-center gap-2 rounded-xl bg-slate-800 px-4 py-3 text-sm font-medium transition hover:bg-slate-700"
         >
-          <Home className="w-4 h-4" />
+          <Home className="h-4 w-4" />
           العودة للموقع
         </Link>
       </div>
@@ -71,7 +80,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   useEffect(() => {
     if (loading) return;
-    
+
     if (!user) {
       router.push("/");
       return;
@@ -95,38 +104,51 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   if (loading || isAdmin === null) {
     return (
-      <div className="flex h-screen w-full items-center justify-center bg-slate-900 border-t-4 border-red-500">
-        <Loader2 className="w-12 h-12 animate-spin text-red-500" />
+      <div className="flex h-screen w-full items-center justify-center border-t-4 border-red-500 bg-slate-900">
+        <Loader2 className="h-12 w-12 animate-spin text-red-500" />
       </div>
     );
   }
 
   if (isAdmin === false) {
     return (
-      <div className="flex flex-col h-screen w-full items-center justify-center bg-slate-900 border-t-8 border-red-600 text-center p-6">
-        <ShieldX className="w-24 h-24 text-red-500 mb-6" />
-        <h1 className="text-4xl font-bold text-white mb-4">تم الحظر الكامل</h1>
-        <p className="text-red-400 mb-8 max-w-md text-lg">هذه المنطقة مشفرة ومؤمنة بالكامل كخرسانة صلبة للمسؤول فقط. يرجى مغادرة الصفحة فوراً.</p>
-        <Link href="/" className="px-8 py-3 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl transition-all">العودة للرئيسية</Link>
+      <div className="flex h-screen w-full flex-col items-center justify-center border-t-8 border-red-600 bg-slate-900 p-6 text-center">
+        <ShieldX className="mb-6 h-24 w-24 text-red-500" />
+        <h1 className="mb-4 text-4xl font-bold text-white">تم الحظر الكامل</h1>
+        <p className="mb-8 max-w-md text-lg text-red-400">
+          هذه المنطقة مشفرة ومؤمنة بالكامل كخرسانة صلبة للمسؤول فقط. يرجى مغادرة الصفحة
+          فوراً.
+        </p>
+        <Link
+          href="/"
+          className="rounded-xl bg-red-600 px-8 py-3 font-bold text-white transition-all hover:bg-red-700"
+        >
+          العودة للرئيسية
+        </Link>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex font-sans overflow-hidden" dir="rtl">
+    <div
+      className="flex min-h-screen overflow-hidden bg-slate-950 font-sans text-slate-100"
+      dir="rtl"
+    >
       {/* Mobile Header */}
-      <header className="lg:hidden fixed top-0 inset-x-0 h-16 bg-slate-900 border-b border-slate-800 flex items-center justify-between px-6 z-40">
+      <header className="fixed inset-x-0 top-0 z-40 flex h-16 items-center justify-between border-b border-slate-800 bg-slate-900 px-6 lg:hidden">
         <div className="flex items-center gap-3">
-           <div className="w-8 h-8 rounded-lg bg-red-600 flex items-center justify-center font-black">S^</div>
-           <span className="font-bold text-sm">Dashboard</span>
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-red-600 font-black">
+            S^
+          </div>
+          <span className="text-sm font-bold">Dashboard</span>
         </div>
         <button onClick={() => setIsSidebarOpen(true)} className="p-2 text-slate-400">
-          <Menu className="w-6 h-6" />
+          <Menu className="h-6 w-6" />
         </button>
       </header>
 
       {/* Desktop Sidebar */}
-      <aside className="hidden lg:flex w-72 bg-slate-900 border-l border-slate-800 flex-col shrink-0 overflow-y-auto">
+      <aside className="hidden w-72 shrink-0 flex-col overflow-y-auto border-l border-slate-800 bg-slate-900 lg:flex">
         <SidebarContent pathname={pathname} />
       </aside>
 
@@ -134,23 +156,26 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       <AnimatePresence>
         {isSidebarOpen && (
           <>
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setIsSidebarOpen(false)}
-              className="lg:hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-[50]"
+              className="fixed inset-0 z-[50] bg-black/60 backdrop-blur-sm lg:hidden"
             />
-            <motion.aside 
+            <motion.aside
               initial={{ x: "100%" }}
               animate={{ x: 0 }}
               exit={{ x: "100%" }}
               transition={{ type: "spring", damping: 25, stiffness: 200 }}
-              className="lg:hidden fixed inset-y-0 right-0 w-80 bg-slate-900 z-[60] shadow-2xl flex flex-col"
+              className="fixed inset-y-0 right-0 z-[60] flex w-80 flex-col bg-slate-900 shadow-2xl lg:hidden"
             >
-              <div className="absolute left-4 top-4">
-                <button onClick={() => setIsSidebarOpen(false)} className="p-2 text-slate-500">
-                  <X className="w-6 h-6" />
+              <div className="absolute top-4 left-4">
+                <button
+                  onClick={() => setIsSidebarOpen(false)}
+                  className="p-2 text-slate-500"
+                >
+                  <X className="h-6 w-6" />
                 </button>
               </div>
               <SidebarContent pathname={pathname} />
@@ -159,10 +184,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         )}
       </AnimatePresence>
 
-      <main className="flex-1 overflow-y-auto w-full pt-16 lg:pt-0">
-        <div className="p-6 md:p-10 max-w-7xl mx-auto">
-          {children}
-        </div>
+      <main className="w-full flex-1 overflow-y-auto pt-16 lg:pt-0">
+        <div className="mx-auto max-w-7xl p-6 md:p-10">{children}</div>
       </main>
     </div>
   );

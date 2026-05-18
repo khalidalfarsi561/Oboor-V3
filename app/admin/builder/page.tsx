@@ -2,10 +2,16 @@
 
 import React, { useState, useEffect, useTransition } from "react";
 import { Reorder, motion, AnimatePresence } from "framer-motion";
-import { 
-  Move as MoveIcon, Save as SaveIcon, Loader2 as LoaderIcon, Maximize as MaximizeIcon, 
-  Smartphone as SmartphoneIcon, MousePointer2 as MousePointer2Icon, RefreshCcw as RefreshCcwIcon, 
-  Sparkles as SparklesIcon, Bot
+import {
+  Move as MoveIcon,
+  Save as SaveIcon,
+  Loader2 as LoaderIcon,
+  Maximize as MaximizeIcon,
+  Smartphone as SmartphoneIcon,
+  MousePointer2 as MousePointer2Icon,
+  RefreshCcw as RefreshCcwIcon,
+  Sparkles as SparklesIcon,
+  Bot,
 } from "lucide-react";
 import { toast } from "sonner";
 import { saveSiteSettings, generateDesignPatch } from "../../actions/admin";
@@ -40,7 +46,7 @@ export default function VisualBuilder() {
   const [saving, setSaving] = useState(false);
   const [aiPrompt, setAiPrompt] = useState("");
   const [viewMode, setViewMode] = useState<"desktop" | "mobile">("desktop");
-  
+
   const [isAiPending, startAiTransition] = useTransition();
 
   useEffect(() => {
@@ -55,9 +61,9 @@ export default function VisualBuilder() {
 
   const handleSave = async () => {
     if (!user) {
-  toast.error("يرجى تسجيل الدخول.");
-  return;
-}
+      toast.error("يرجى تسجيل الدخول.");
+      return;
+    }
     setSaving(true);
     toast.loading("يتم حفظ التصميم الجديد...", { id: "builder" });
     const res = await saveSiteSettings(user.uid, items, design);
@@ -72,7 +78,7 @@ export default function VisualBuilder() {
   const applyAiStyling = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!aiPrompt.trim() || isAiPending) return;
-    
+
     const toastId = "ai-style";
     toast.loading("جاري تحليل طلبك وتنفيذ التعديلات...", { id: toastId });
 
@@ -80,16 +86,26 @@ export default function VisualBuilder() {
       try {
         const currentId = selectedId || "global";
         const currentStyle = design[currentId] || {};
-        
-        const res = await generateDesignPatch(currentId, currentStyle, aiPrompt);
-        
+
+        if (!user) {
+          toast.error("يرجى تسجيل الدخول.");
+          return;
+        }
+
+        const res = await generateDesignPatch(
+          user.uid,
+          currentId,
+          currentStyle,
+          aiPrompt
+        );
+
         if (res.success && res.patch) {
-          setDesign(prev => ({
+          setDesign((prev) => ({
             ...prev,
             [currentId]: {
               ...prev[currentId],
-              ...res.patch
-            }
+              ...res.patch,
+            },
           }));
           setAiPrompt("");
           toast.success("تم تنفيذ التعديل بنجاح عبر الذكاء الاصطناعي!", { id: toastId });
@@ -105,93 +121,129 @@ export default function VisualBuilder() {
 
   if (loading) {
     return (
-      <div className="h-96 w-full flex flex-col items-center justify-center gap-4">
-        <LoaderIcon className="w-12 h-12 animate-spin text-red-500" />
-        <p className="text-slate-400 animate-pulse">جاري تحضير بيئة التصميم الحية...</p>
+      <div className="flex h-96 w-full flex-col items-center justify-center gap-4">
+        <LoaderIcon className="h-12 w-12 animate-spin text-red-500" />
+        <p className="animate-pulse text-slate-400">جاري تحضير بيئة التصميم الحية...</p>
       </div>
     );
   }
 
-  const selectedElement = CONTROL_ELEMENTS.find(e => e.id === selectedId);
+  const selectedElement = CONTROL_ELEMENTS.find((e) => e.id === selectedId);
 
   return (
-    <div className="w-full flex h-[calc(100vh-100px)] overflow-hidden bg-slate-950 rounded-[40px] border border-slate-800 shadow-2xl relative" dir="rtl">
-      
+    <div
+      className="relative flex h-[calc(100vh-100px)] w-full overflow-hidden rounded-[40px] border border-slate-800 bg-slate-950 shadow-2xl"
+      dir="rtl"
+    >
       {/* Sidebar - UI Sections Ordering & Publishing */}
-      <aside className="w-72 border-r border-slate-800 bg-slate-900 overflow-y-auto flex flex-col shrink-0">
-        <div className="p-6 border-b border-slate-800 bg-slate-800/30">
-          <div className="flex items-center justify-between mb-4">
-             <h2 className="font-bold text-white flex items-center gap-2">
-               <SparklesIcon className="w-5 h-5 text-red-500" />
-               الذكاء الاصطناعي
-             </h2>
-             <button 
-               disabled={saving}
-               onClick={handleSave}
-               className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg shadow-lg shadow-red-600/10 transition-all font-bold text-sm flex items-center gap-2"
-             >
-               {saving ? <LoaderIcon className="w-4 h-4 animate-spin" /> : <SaveIcon className="w-4 h-4" />}
-               نشر الموقع
-             </button>
+      <aside className="flex w-72 shrink-0 flex-col overflow-y-auto border-r border-slate-800 bg-slate-900">
+        <div className="border-b border-slate-800 bg-slate-800/30 p-6">
+          <div className="mb-4 flex items-center justify-between">
+            <h2 className="flex items-center gap-2 font-bold text-white">
+              <SparklesIcon className="h-5 w-5 text-red-500" />
+              الذكاء الاصطناعي
+            </h2>
+            <button
+              disabled={saving}
+              onClick={handleSave}
+              className="flex items-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-sm font-bold text-white shadow-lg shadow-red-600/10 transition-all hover:bg-red-700"
+            >
+              {saving ? (
+                <LoaderIcon className="h-4 w-4 animate-spin" />
+              ) : (
+                <SaveIcon className="h-4 w-4" />
+              )}
+              نشر الموقع
+            </button>
           </div>
-          <p className="text-[10px] text-slate-500 font-medium">تم حذف التعديل اليدوي. استخدم ذكاء المنصة لتغيير أي شيء تراه في المعاينة.</p>
+          <p className="text-[10px] font-medium text-slate-500">
+            تم حذف التعديل اليدوي. استخدم ذكاء المنصة لتغيير أي شيء تراه في المعاينة.
+          </p>
         </div>
 
-        <div className="flex-1 p-5 space-y-8">
-            <div className="bg-slate-800/20 p-4 rounded-3xl border border-slate-800">
-               <h3 className="text-xs font-black text-slate-600 uppercase mb-4 tracking-tighter">ترتيب عناصر الموقع</h3>
-               <Reorder.Group axis="y" values={items} onReorder={setItems} className="space-y-2">
-                 {items.map(it => (
-                    <Reorder.Item key={it} value={it} className="bg-slate-800/80 p-3 rounded-xl border border-slate-700/50 flex items-center justify-between cursor-grab group transition-all hover:bg-slate-800">
-                      <div className="flex items-center gap-3">
-                        <MoveIcon className="w-3 h-3 text-slate-500 group-hover:text-red-500" />
-                        <span className="text-[11px] font-bold text-slate-300 capitalize">{it}</span>
-                      </div>
-                    </Reorder.Item>
-                 ))}
-               </Reorder.Group>
-            </div>
+        <div className="flex-1 space-y-8 p-5">
+          <div className="rounded-3xl border border-slate-800 bg-slate-800/20 p-4">
+            <h3 className="mb-4 text-xs font-black tracking-tighter text-slate-600 uppercase">
+              ترتيب عناصر الموقع
+            </h3>
+            <Reorder.Group
+              axis="y"
+              values={items}
+              onReorder={setItems}
+              className="space-y-2"
+            >
+              {items.map((it) => (
+                <Reorder.Item
+                  key={it}
+                  value={it}
+                  className="group flex cursor-grab items-center justify-between rounded-xl border border-slate-700/50 bg-slate-800/80 p-3 transition-all hover:bg-slate-800"
+                >
+                  <div className="flex items-center gap-3">
+                    <MoveIcon className="h-3 w-3 text-slate-500 group-hover:text-red-500" />
+                    <span className="text-[11px] font-bold text-slate-300 capitalize">
+                      {it}
+                    </span>
+                  </div>
+                </Reorder.Item>
+              ))}
+            </Reorder.Group>
+          </div>
 
-            <div className="bg-slate-900 border border-slate-700/50 p-4 rounded-3xl">
-               <h4 className="text-xs font-bold text-white mb-2 flex items-center gap-2">
-                 <Bot className="w-4 h-4 text-red-500" />
-                 رؤية التصميم
-               </h4>
-               <p className="text-[10px] text-slate-400 leading-relaxed italic">&quot;تخيل موقعك كما تريده، وسأقوم بهندسته لك في ثوانٍ. اضغط على أي عنصر وابدأ الحوار.&quot;</p>
-            </div>
+          <div className="rounded-3xl border border-slate-700/50 bg-slate-900 p-4">
+            <h4 className="mb-2 flex items-center gap-2 text-xs font-bold text-white">
+              <Bot className="h-4 w-4 text-red-500" />
+              رؤية التصميم
+            </h4>
+            <p className="text-[10px] leading-relaxed text-slate-400 italic">
+              &quot;تخيل موقعك كما تريده، وسأقوم بهندسته لك في ثوانٍ. اضغط على أي عنصر
+              وابدأ الحوار.&quot;
+            </p>
+          </div>
         </div>
       </aside>
 
       {/* Workspace Canvas */}
-      <section className="flex-1 bg-[#0a0a0a] overflow-hidden relative flex flex-col">
+      <section className="relative flex flex-1 flex-col overflow-hidden bg-[#0a0a0a]">
         {/* Device & Toolbar */}
-        <div className="h-16 border-b border-slate-800 bg-slate-900/50 flex items-center justify-between px-8 shrink-0 backdrop-blur-xl">
-           <div className="flex items-center gap-6">
-             <div className="flex bg-slate-950 p-1 rounded-xl border border-slate-800">
-               <button onClick={() => setViewMode("desktop")} className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-2 ${viewMode === "desktop" ? 'bg-red-600 text-white shadow-lg' : 'text-slate-500 hover:text-white'}`}><MaximizeIcon className="w-3 h-3" /> ديسكتوب</button>
-               <button onClick={() => setViewMode("mobile")} className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-2 ${viewMode === "mobile" ? 'bg-red-600 text-white shadow-lg' : 'text-slate-500 hover:text-white'}`}><SmartphoneIcon className="w-3 h-3" /> جوال</button>
-             </div>
-             <div className="h-4 w-[1px] bg-slate-800" />
-             <div className="flex items-center gap-2 px-3 py-1 bg-slate-950 rounded-lg border border-slate-800">
-               <MousePointer2Icon className="w-3 h-3 text-red-500" />
-               <span className="text-[10px] font-black text-slate-500 uppercase">Focus & Annotate Mode ACTIVE</span>
-             </div>
-           </div>
-
-           <div className="flex items-center gap-4">
-              <button 
-                onClick={() => {
-                  setDesign({});
-                  toast.success("تم تصفير التصميم، عدنا للبداية!");
-                }}
-                className="text-xs text-slate-500 hover:text-white transition-all flex items-center gap-1"
+        <div className="flex h-16 shrink-0 items-center justify-between border-b border-slate-800 bg-slate-900/50 px-8 backdrop-blur-xl">
+          <div className="flex items-center gap-6">
+            <div className="flex rounded-xl border border-slate-800 bg-slate-950 p-1">
+              <button
+                onClick={() => setViewMode("desktop")}
+                className={`flex items-center gap-2 rounded-lg px-4 py-1.5 text-xs font-bold transition-all ${viewMode === "desktop" ? "bg-red-600 text-white shadow-lg" : "text-slate-500 hover:text-white"}`}
               >
-                <RefreshCcwIcon className="w-3 h-3" /> تصفير
+                <MaximizeIcon className="h-3 w-3" /> ديسكتوب
               </button>
-           </div>
+              <button
+                onClick={() => setViewMode("mobile")}
+                className={`flex items-center gap-2 rounded-lg px-4 py-1.5 text-xs font-bold transition-all ${viewMode === "mobile" ? "bg-red-600 text-white shadow-lg" : "text-slate-500 hover:text-white"}`}
+              >
+                <SmartphoneIcon className="h-3 w-3" /> جوال
+              </button>
+            </div>
+            <div className="h-4 w-[1px] bg-slate-800" />
+            <div className="flex items-center gap-2 rounded-lg border border-slate-800 bg-slate-950 px-3 py-1">
+              <MousePointer2Icon className="h-3 w-3 text-red-500" />
+              <span className="text-[10px] font-black text-slate-500 uppercase">
+                Focus & Annotate Mode ACTIVE
+              </span>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-4">
+            <button
+              onClick={() => {
+                setDesign({});
+                toast.success("تم تصفير التصميم، عدنا للبداية!");
+              }}
+              className="flex items-center gap-1 text-xs text-slate-500 transition-all hover:text-white"
+            >
+              <RefreshCcwIcon className="h-3 w-3" /> تصفير
+            </button>
+          </div>
         </div>
 
-        <BuilderPreview 
+        <BuilderPreview
           viewMode={viewMode}
           selectedId={selectedId}
           setSelectedId={setSelectedId}
@@ -202,7 +254,7 @@ export default function VisualBuilder() {
           controlElements={CONTROL_ELEMENTS}
         />
 
-        <BuilderPromptBar 
+        <BuilderPromptBar
           selectedId={selectedId}
           selectedLabel={selectedElement?.label || "العنصر"}
           aiPrompt={aiPrompt}

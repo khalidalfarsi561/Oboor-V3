@@ -30,10 +30,10 @@ export function ShortlinkCountdown() {
 
   return (
     <>
-      <div className="bg-blue-50 text-blue-700 font-bold text-4xl sm:text-5xl py-6 sm:py-8 rounded-2xl mb-4 transition-all">
+      <div className="mb-4 rounded-2xl bg-blue-50 py-6 text-4xl font-bold text-blue-700 transition-all sm:py-8 sm:text-5xl">
         {countdown}
       </div>
-      <p className="text-sm sm:text-base font-medium text-slate-400">
+      <p className="text-sm font-medium text-slate-400 sm:text-base">
         جاري التوجيه التلقائي إلى الصفحة السرية...
       </p>
     </>

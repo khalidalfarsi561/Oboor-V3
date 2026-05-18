@@ -18,64 +18,75 @@ interface HomeHeaderProps {
 
 export function HomeHeader({ user, balance, signIn, signOut, design }: HomeHeaderProps) {
   const getStyle = (id: string) => mapDesignPatchToStyle(design[id] || {});
-  
+
   // Placeholder for the logo URL - user can replace this
   const LOGO_URL = "https://i.ibb.co/qYVNPk3z/202604212003.jpg"; // Replace with real logo URL
 
   return (
-    <header className="flex flex-row items-center justify-between mb-8 md:mb-16 group/nav px-4 sm:px-0" style={getStyle("nav")}>
+    <header
+      className="group/nav mb-8 flex flex-row items-center justify-between px-4 sm:px-0 md:mb-16"
+      style={getStyle("nav")}
+    >
       {/* Sign In Section - Exact match for image for mobile */}
-      <div className="flex flex-row items-center order-1 md:order-2">
+      <div className="order-1 flex flex-row items-center md:order-2">
         {user ? (
           <div className="flex items-center gap-2">
             {/* Minimal Mobile view for logged in user */}
-            <div className="md:hidden flex items-center gap-2">
-               <UserAvatar src={user.photoURL} alt={user.displayName} size={32} />
-               <button
-                  onClick={signOut}
-                  className="bg-red-500/10 text-red-600 px-3 py-1 rounded-lg text-xs font-bold"
-               >
-                  خروج
-               </button>
+            <div className="flex items-center gap-2 md:hidden">
+              <UserAvatar src={user.photoURL} alt={user.displayName} size={32} />
+              <button
+                onClick={signOut}
+                className="rounded-lg bg-red-500/10 px-3 py-1 text-xs font-bold text-red-600"
+              >
+                خروج
+              </button>
             </div>
 
             {/* Desktop view for logged in user */}
-            <div className="hidden md:flex items-center gap-3">
+            <div className="hidden items-center gap-3 md:flex">
               <UserAvatar src={user.photoURL} alt={user.displayName} />
               {user.email === "khalidalfarsi1995@gmail.com" && (
-                <Link 
-                  href="/admin" 
-                  className="w-10 h-10 rounded-full bg-slate-900 flex items-center justify-center text-white hover:bg-slate-800 transition-all hover:scale-110 shadow-lg shadow-slate-900/10"
+                <Link
+                  href="/admin"
+                  className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-900 text-white shadow-lg shadow-slate-900/10 transition-all hover:scale-110 hover:bg-slate-800"
                   title="لوحة التحكم"
                   style={getStyle("admin_btn")}
                 >
-                  <Gift className="w-5 h-5" />
+                  <Gift className="h-5 w-5" />
                 </Link>
               )}
               <NotificationCenter userId={user.uid} />
-              
-              <div className="flex items-center justify-center gap-2 bg-white shadow-sm border border-slate-200 px-4 py-2 rounded-full" dir="ltr" title="الرصيد/المحفظة" style={getStyle("wallet")}>
+
+              <div
+                className="flex items-center justify-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 shadow-sm"
+                dir="ltr"
+                title="الرصيد/المحفظة"
+                style={getStyle("wallet")}
+              >
                 <AnimatePresence mode="popLayout">
-                  <motion.span 
+                  <motion.span
                     key={balance}
                     initial={{ opacity: 0, y: -5 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: 5 }}
-                    className="font-bold text-slate-800 text-base md:text-lg inline-block"
+                    className="inline-block text-base font-bold text-slate-800 md:text-lg"
                   >
-                    ${balance !== null ? balance : "..."} 
+                    ${balance !== null ? balance : "..."}
                   </motion.span>
                 </AnimatePresence>
-                <Wallet className="w-5 h-5 text-blue-600" style={getStyle("wallet_icon")} />
+                <Wallet
+                  className="h-5 w-5 text-blue-600"
+                  style={getStyle("wallet_icon")}
+                />
               </div>
 
               <button
                 onClick={signOut}
                 title="تسجيل الخروج"
-                className="flex items-center justify-center p-2 text-slate-400 hover:text-red-500 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 rounded-full"
+                className="flex items-center justify-center rounded-full p-2 text-slate-400 transition-colors hover:text-red-500 focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:outline-none"
                 style={getStyle("logout_btn")}
               >
-                <LogOut className="w-5 h-5" />
+                <LogOut className="h-5 w-5" />
               </button>
             </div>
           </div>
@@ -84,8 +95,11 @@ export function HomeHeader({ user, balance, signIn, signOut, design }: HomeHeade
             {/* Mobile Login Button (Exactly like image) */}
             <button
               onClick={signIn}
-              className="md:hidden bg-[#2563EB] text-white px-6 py-2 rounded-[10px] text-[15px] font-bold shadow-[0_4px_14px_0_rgba(37,99,235,0.39)] hover:bg-blue-700 transition-all active:scale-95"
-              style={{ fontFamily: "'Childos Arabic', sans-serif", ...getStyle("login_btn_mobile") }}
+              className="rounded-[10px] bg-[#2563EB] px-6 py-2 text-[15px] font-bold text-white shadow-[0_4px_14px_0_rgba(37,99,235,0.39)] transition-all hover:bg-blue-700 active:scale-95 md:hidden"
+              style={{
+                fontFamily: "'Childos Arabic', sans-serif",
+                ...getStyle("login_btn_mobile"),
+              }}
             >
               تسجيل الدخول
             </button>
@@ -94,10 +108,10 @@ export function HomeHeader({ user, balance, signIn, signOut, design }: HomeHeade
             <button
               onClick={signIn}
               title="تسجيل الدخول"
-              className="hidden md:flex items-center justify-center gap-2 bg-blue-700 text-white shadow-sm hover:shadow-lg hover:shadow-blue-700/20 px-7 py-2.5 rounded-full font-medium transition-all duration-200 hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-700 focus-visible:ring-offset-2"
+              className="hidden items-center justify-center gap-2 rounded-full bg-blue-700 px-7 py-2.5 font-medium text-white shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-blue-700/20 focus-visible:ring-2 focus-visible:ring-blue-700 focus-visible:ring-offset-2 focus-visible:outline-none md:flex"
               style={getStyle("login_btn")}
             >
-              <LogIn className="w-4 h-4 ml-1" />
+              <LogIn className="ml-1 h-4 w-4" />
               تسجيل الدخول
             </button>
           </>
@@ -105,27 +119,39 @@ export function HomeHeader({ user, balance, signIn, signOut, design }: HomeHeade
       </div>
 
       {/* Brand / Logo Section - On the Right for Mobile */}
-      <div className="flex items-center order-2 md:order-1" style={getStyle("brand")}>
+      <div className="order-2 flex items-center md:order-1" style={getStyle("brand")}>
         {/* Mobile Logo (Exactly like image) */}
-        <div className="md:hidden flex items-center">
+        <div className="flex items-center md:hidden">
           <Link href="/">
-            <img 
-              src={LOGO_URL} 
-              alt="Logo" 
-              style={{ width: '243.6px', height: '117.2px', mixBlendMode: 'multiply' }}
-              className="object-contain bg-transparent max-w-none" 
+            <img
+              src={LOGO_URL}
+              alt="Logo"
+              style={{ width: "243.6px", height: "117.2px", mixBlendMode: "multiply" }}
+              className="max-w-none bg-transparent object-contain"
               referrerPolicy="no-referrer"
             />
           </Link>
         </div>
 
         {/* Desktop Brand */}
-        <div className="hidden md:flex items-center gap-3 bg-white/50 backdrop-blur-md border border-slate-200/50 pl-6 pr-4 py-2 rounded-2xl shadow-sm hover:shadow-md transition-all hover:bg-white hover:-translate-y-0.5" style={getStyle("brand_desktop")}>
-          <div className="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center shadow-lg shadow-blue-600/20 shrink-0" style={getStyle("icon_bg")}>
-            <Gift className="w-5 h-5 text-white" />
+        <div
+          className="hidden items-center gap-3 rounded-2xl border border-slate-200/50 bg-white/50 py-2 pr-4 pl-6 shadow-sm backdrop-blur-md transition-all hover:-translate-y-0.5 hover:bg-white hover:shadow-md md:flex"
+          style={getStyle("brand_desktop")}
+        >
+          <div
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-600 shadow-lg shadow-blue-600/20"
+            style={getStyle("icon_bg")}
+          >
+            <Gift className="h-5 w-5 text-white" />
           </div>
-          <h1 className="text-xl font-bold tracking-tight text-slate-900 whitespace-nowrap" style={getStyle("brand_text")}>
-            متجر <span className="text-blue-600" style={getStyle("accent_text")}>المكافآت</span>
+          <h1
+            className="text-xl font-bold tracking-tight whitespace-nowrap text-slate-900"
+            style={getStyle("brand_text")}
+          >
+            متجر{" "}
+            <span className="text-blue-600" style={getStyle("accent_text")}>
+              المكافآت
+            </span>
           </h1>
         </div>
       </div>

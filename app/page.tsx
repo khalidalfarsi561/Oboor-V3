@@ -3,19 +3,19 @@ import { getStoreStock } from "./actions/store";
 import { HomeClient } from "./components/home/HomeClient";
 import { getPublicSiteSettings } from "./lib/site-settings";
 
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
   const [stockMap, siteSettings] = await Promise.all([
     getStoreStock(),
-    getPublicSiteSettings()
+    getPublicSiteSettings(),
   ]);
-  
+
   return (
-    <HomeClient 
-      stockMap={stockMap} 
-      layoutOrder={siteSettings.order} 
-      design={siteSettings.design} 
+    <HomeClient
+      stockMap={stockMap}
+      layoutOrder={siteSettings.order}
+      design={siteSettings.design}
     />
   );
 }

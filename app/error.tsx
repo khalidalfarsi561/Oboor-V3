@@ -15,17 +15,17 @@ export default function ErrorBoundaryPage({
   }, [error]);
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-8 text-center">
-      <div className="w-20 h-20 bg-red-50 rounded-2xl flex items-center justify-center mx-auto mb-6">
-        <AlertCircle className="w-10 h-10 text-red-500" />
+    <div className="flex min-h-screen flex-col items-center justify-center bg-slate-50 p-8 text-center">
+      <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-2xl bg-red-50">
+        <AlertCircle className="h-10 w-10 text-red-500" />
       </div>
-      <h2 className="text-2xl font-bold text-slate-900 mb-4">حدث خطأ غير متوقع</h2>
-      <p className="text-slate-500 mb-8 max-w-md">
+      <h2 className="mb-4 text-2xl font-bold text-slate-900">حدث خطأ غير متوقع</h2>
+      <p className="mb-8 max-w-md text-slate-500">
         نأسف، لقد واجهنا مشكلة أثناء معالجة طلبك.
       </p>
       <button
         onClick={() => reset()}
-        className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-xl font-bold shadow-lg transition-colors"
+        className="rounded-xl bg-blue-600 px-8 py-3 font-bold text-white shadow-lg transition-colors hover:bg-blue-700"
       >
         حاول مرة أخرى
       </button>

@@ -10,18 +10,18 @@ import { HomeHeader } from "./HomeHeader";
 import { HomeSections } from "./HomeSections";
 import { LayoutSectionId, DesignPatch } from "../../lib/design";
 
-export function HomeClient({ 
-  stockMap, 
-  layoutOrder = ["hero", "claim", "store"], 
-  design = {} 
-}: { 
-  stockMap: Record<number, number> | null, 
-  layoutOrder?: LayoutSectionId[], 
-  design?: Record<string, DesignPatch> 
+export function HomeClient({
+  stockMap,
+  layoutOrder = ["hero", "claim", "store"],
+  design = {},
+}: {
+  stockMap: Record<number, number> | null;
+  layoutOrder?: LayoutSectionId[];
+  design?: Record<string, DesignPatch>;
 }) {
   const { user, loading, signIn, signOut } = useAuth();
   const { balance, isBalanceLoading } = useUserBalance(user?.uid);
-  
+
   const [code, setCode] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
   const [claiming, setClaiming] = useState(false);
@@ -29,7 +29,7 @@ export function HomeClient({
   const handleClaim = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMsg("");
-    
+
     if (!user) {
       toast.error("يرجى تسجيل الدخول أولاً.");
       return;
@@ -49,18 +49,17 @@ export function HomeClient({
       }
 
       toast.success(`تم بنجاح! تمت إضافة ${result.amount}$ إلى رصيدك.`, {
-        icon: <CheckCircle2 className="text-green-500 w-5 h-5" />
+        icon: <CheckCircle2 className="h-5 w-5 text-green-500" />,
       });
       setCode("");
-      
+
       const { default: confetti } = await import("canvas-confetti");
       confetti({
         particleCount: 100,
         spread: 70,
         origin: { y: 0.6 },
-        colors: ["#2563eb", "#4f46e5", "#38bdf8"]
+        colors: ["#2563eb", "#4f46e5", "#38bdf8"],
       });
-
     } catch (err: unknown) {
       console.error(err);
       setErrorMsg(err instanceof Error ? err.message : "حدث خطأ غير متوقع.");
@@ -71,27 +70,28 @@ export function HomeClient({
 
   if (loading || (user && isBalanceLoading && balance === null)) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-        <div aria-busy="true"><Loader2 className="w-8 h-8 animate-spin text-blue-600" /></div>
+      <div className="flex min-h-screen items-center justify-center bg-slate-50">
+        <div aria-busy="true">
+          <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 selection:bg-blue-100 relative">
-      <div className="absolute top-0 inset-x-0 h-64 bg-gradient-to-b from-blue-50 to-transparent pointer-events-none" />
-      
-      <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-10 relative z-10">
-        
-        <HomeHeader 
-          user={user} 
-          balance={balance} 
-          signIn={signIn} 
-          signOut={signOut} 
-          design={design} 
+    <div className="relative min-h-screen bg-slate-50 selection:bg-blue-100">
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-64 bg-gradient-to-b from-blue-50 to-transparent" />
+
+      <main className="relative z-10 mx-auto max-w-6xl px-4 py-8 sm:px-6 md:py-10 lg:px-8">
+        <HomeHeader
+          user={user}
+          balance={balance}
+          signIn={signIn}
+          signOut={signOut}
+          design={design}
         />
 
-        <HomeSections 
+        <HomeSections
           layoutOrder={layoutOrder}
           design={design}
           stockMap={stockMap}
@@ -105,7 +105,6 @@ export function HomeClient({
           errorMsg={errorMsg}
           setErrorMsg={setErrorMsg}
         />
-
       </main>
     </div>
   );

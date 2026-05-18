@@ -15,8 +15,8 @@ export function UserAvatar({ src, alt, size = 40 }: UserAvatarProps) {
   const fallback = `https://ui-avatars.com/api/?name=${encodeURIComponent(alt || "User")}&background=random`;
 
   return (
-    <div 
-      className="relative rounded-full overflow-hidden border-2 border-white shadow-sm shrink-0" 
+    <div
+      className="relative shrink-0 overflow-hidden rounded-full border-2 border-white shadow-sm"
       style={{ width: size, height: size }}
     >
       <Image

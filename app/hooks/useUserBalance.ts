@@ -16,18 +16,22 @@ export function useUserBalance(userId: string | undefined | null) {
 
     setIsBalanceLoading(true);
     const userRef = doc(db, "users", userId);
-    
-    const unsubscribe = onSnapshot(userRef, (docSnap) => {
-      if (docSnap.exists()) {
-        setBalance(docSnap.data().balance || 0);
-      } else {
-        setBalance(0);
+
+    const unsubscribe = onSnapshot(
+      userRef,
+      (docSnap) => {
+        if (docSnap.exists()) {
+          setBalance(docSnap.data().balance || 0);
+        } else {
+          setBalance(0);
+        }
+        setIsBalanceLoading(false);
+      },
+      (err) => {
+        console.error("Error fetching balance snapshot:", err);
+        setIsBalanceLoading(false);
       }
-      setIsBalanceLoading(false);
-    }, (err) => {
-      console.error("Error fetching balance snapshot:", err);
-      setIsBalanceLoading(false);
-    });
+    );
 
     return () => unsubscribe();
   }, [userId]);

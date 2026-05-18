@@ -5,16 +5,17 @@ import { adminDb } from "../lib/firebase/admin";
 export async function getUserNotifications(userId: string) {
   if (!userId) return [];
   try {
-    const snap = await adminDb.collection("userNotifications")
+    const snap = await adminDb
+      .collection("userNotifications")
       .where("userId", "==", userId)
       .orderBy("createdAt", "desc")
       .limit(20)
       .get();
-      
-    return snap.docs.map(doc => ({
+
+    return snap.docs.map((doc) => ({
       id: doc.id,
       ...doc.data(),
-      createdAt: doc.data().createdAt?.toMillis() || Date.now()
+      createdAt: doc.data().createdAt?.toMillis() || Date.now(),
     }));
   } catch (err) {
     console.error("Error fetching notifications:", err);

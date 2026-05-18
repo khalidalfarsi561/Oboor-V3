@@ -1,7 +1,19 @@
 "use client";
 
-import React, { createContext, useContext, useEffect, useState, useCallback } from "react";
-import { User, onAuthStateChanged, signInWithPopup, GoogleAuthProvider, signOut as firebaseSignOut } from "firebase/auth";
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  useCallback,
+} from "react";
+import {
+  User,
+  onAuthStateChanged,
+  signInWithPopup,
+  GoogleAuthProvider,
+  signOut as firebaseSignOut,
+} from "firebase/auth";
 import { auth } from "../lib/firebase/client";
 import { toast } from "sonner";
 import { bootstrapUser } from "../actions/auth";
@@ -47,12 +59,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       const provider = new GoogleAuthProvider();
       provider.setCustomParameters({
-        prompt: 'select_account'
+        prompt: "select_account",
       });
       await signInWithPopup(auth, provider);
     } catch (error: unknown) {
       console.error("Sign in failed", error);
-      toast.error(`عذراً، فشل تسجيل الدخول: ${error instanceof Error ? error.message : "خطأ غير معروف"} - جرب استخدام متصفح آخر أو إيقاف مانع النوافذ المنبثقة`);
+      toast.error(
+        `عذراً، فشل تسجيل الدخول: ${error instanceof Error ? error.message : "خطأ غير معروف"} - جرب استخدام متصفح آخر أو إيقاف مانع النوافذ المنبثقة`
+      );
     }
   }, []);
 

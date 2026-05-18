@@ -33,45 +33,36 @@ export function HomeSections({
   setCode,
   claiming,
   errorMsg,
-  setErrorMsg
+  setErrorMsg,
 }: HomeSectionsProps) {
   const getSectionStyle = (id: string) => mapDesignPatchToStyle(design[id] || {});
 
   const componentsMap: Record<LayoutSectionId, React.ReactNode> = {
     hero: (
-      <HomeHero 
-        key="hero" 
-        user={user} 
-        signIn={signIn} 
-        style={getSectionStyle("hero")} 
-      />
+      <HomeHero key="hero" user={user} signIn={signIn} style={getSectionStyle("hero")} />
     ),
     claim: (
-      <HomeClaim 
-        key="claim" 
-        user={user} 
-        handleClaim={handleClaim} 
-        code={code} 
-        setCode={setCode} 
-        claiming={claiming} 
-        errorMsg={errorMsg} 
-        setErrorMsg={setErrorMsg} 
-        style={getSectionStyle("claim")} 
+      <HomeClaim
+        key="claim"
+        user={user}
+        handleClaim={handleClaim}
+        code={code}
+        setCode={setCode}
+        claiming={claiming}
+        errorMsg={errorMsg}
+        setErrorMsg={setErrorMsg}
+        style={getSectionStyle("claim")}
       />
     ),
     store: (
-      <StoreItems 
-        key="store" 
-        balance={balance} 
-        stockMap={stockMap} 
-        style={getSectionStyle("store")} 
+      <StoreItems
+        key="store"
+        balance={balance}
+        stockMap={stockMap}
+        style={getSectionStyle("store")}
       />
     ),
   };
 
-  return (
-    <>
-      {layoutOrder.map((sectionId) => componentsMap[sectionId])}
-    </>
-  );
+  return <>{layoutOrder.map((sectionId) => componentsMap[sectionId])}</>;
 }

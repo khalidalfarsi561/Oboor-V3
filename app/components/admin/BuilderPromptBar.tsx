@@ -21,65 +21,69 @@ export function BuilderPromptBar({
   setAiPrompt,
   aiLoading,
   applyAiStyling,
-  setSelectedId
+  setSelectedId,
 }: BuilderPromptBarProps) {
   const aiInputRef = React.useRef<HTMLInputElement>(null);
 
   return (
-    <div className="absolute inset-x-0 bottom-10 flex justify-center px-10 pointer-events-none">
-       <AnimatePresence>
-         {selectedId ? (
-           <motion.div 
-             initial={{ y: 50, opacity: 0 }}
-             animate={{ y: 0, opacity: 1 }}
-             exit={{ y: 50, opacity: 0 }}
-             className="w-full max-w-2xl pointer-events-auto"
-           >
-             <div className="bg-slate-900/90 backdrop-blur-2xl border border-slate-700 p-2 rounded-[32px] shadow-2xl flex items-center gap-3 ring-8 ring-slate-950/20">
-                <div className="flex items-center gap-2 bg-red-600 text-white px-4 py-2 rounded-full font-bold text-xs shrink-0 whitespace-nowrap">
-                   <Sparkles className="w-3 h-3 animate-pulse" />
-                   تعديل {selectedLabel}
-                </div>
-                <form onSubmit={applyAiStyling} className="flex-1 flex gap-2">
-                   <input 
-                     ref={aiInputRef}
-                     autoFocus
-                     type="text" 
-                     placeholder="أخبر الذكاء الاصطناعي ماذا تريد أن تفعل بهذا العنصر..." 
-                     className="flex-1 bg-transparent px-4 py-2 text-sm text-white focus:outline-none placeholder:text-slate-600"
-                     value={aiPrompt}
-                     onChange={(e) => setAiPrompt(e.target.value)}
-                     disabled={aiLoading}
-                   />
-                   <button 
-                     type="submit"
-                     disabled={aiLoading || !aiPrompt.trim()}
-                     className="p-3 bg-white text-slate-950 rounded-2xl hover:bg-red-500 hover:text-white transition-all disabled:opacity-30 flex items-center justify-center shrink-0"
-                   >
-                     {aiLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
-                   </button>
-                   <div className="w-[1px] h-6 bg-slate-800 self-center mx-1" />
-                   <button 
-                     type="button"
-                     onClick={() => setSelectedId(null)}
-                     className="p-3 text-slate-500 hover:text-white transition-all"
-                   >
-                     <X className="w-4 h-4" />
-                   </button>
-                </form>
-             </div>
-           </motion.div>
-         ) : (
-           <motion.div 
-             initial={{ opacity: 0 }}
-             animate={{ opacity: 1 }}
-             className="text-xs bg-slate-900/50 backdrop-blur border border-slate-800 text-slate-500 px-6 py-3 rounded-full flex items-center gap-3"
-           >
-             <Info className="w-4 h-4 text-blue-500" />
-             اضغط على أي عنصر في المعاينة لتشغيل محرك تعديل الذكاء الاصطناعي
-           </motion.div>
-         )}
-       </AnimatePresence>
+    <div className="pointer-events-none absolute inset-x-0 bottom-10 flex justify-center px-10">
+      <AnimatePresence>
+        {selectedId ? (
+          <motion.div
+            initial={{ y: 50, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: 50, opacity: 0 }}
+            className="pointer-events-auto w-full max-w-2xl"
+          >
+            <div className="flex items-center gap-3 rounded-[32px] border border-slate-700 bg-slate-900/90 p-2 shadow-2xl ring-8 ring-slate-950/20 backdrop-blur-2xl">
+              <div className="flex shrink-0 items-center gap-2 rounded-full bg-red-600 px-4 py-2 text-xs font-bold whitespace-nowrap text-white">
+                <Sparkles className="h-3 w-3 animate-pulse" />
+                تعديل {selectedLabel}
+              </div>
+              <form onSubmit={applyAiStyling} className="flex flex-1 gap-2">
+                <input
+                  ref={aiInputRef}
+                  autoFocus
+                  type="text"
+                  placeholder="أخبر الذكاء الاصطناعي ماذا تريد أن تفعل بهذا العنصر..."
+                  className="flex-1 bg-transparent px-4 py-2 text-sm text-white placeholder:text-slate-600 focus:outline-none"
+                  value={aiPrompt}
+                  onChange={(e) => setAiPrompt(e.target.value)}
+                  disabled={aiLoading}
+                />
+                <button
+                  type="submit"
+                  disabled={aiLoading || !aiPrompt.trim()}
+                  className="flex shrink-0 items-center justify-center rounded-2xl bg-white p-3 text-slate-950 transition-all hover:bg-red-500 hover:text-white disabled:opacity-30"
+                >
+                  {aiLoading ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Send className="h-4 w-4" />
+                  )}
+                </button>
+                <div className="mx-1 h-6 w-[1px] self-center bg-slate-800" />
+                <button
+                  type="button"
+                  onClick={() => setSelectedId(null)}
+                  className="p-3 text-slate-500 transition-all hover:text-white"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </form>
+            </div>
+          </motion.div>
+        ) : (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="flex items-center gap-3 rounded-full border border-slate-800 bg-slate-900/50 px-6 py-3 text-xs text-slate-500 backdrop-blur"
+          >
+            <Info className="h-4 w-4 text-blue-500" />
+            اضغط على أي عنصر في المعاينة لتشغيل محرك تعديل الذكاء الاصطناعي
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

@@ -12,14 +12,14 @@ export async function getPublicSiteSettings() {
       const data = settingsSnap.data();
       return {
         order: (data?.order as LayoutSectionId[]) || DEFAULT_LAYOUT_ORDER,
-        design: data?.design || DEFAULT_DESIGN
+        design: data?.design || DEFAULT_DESIGN,
       };
     }
   } catch (e) {
     console.error("Error fetching site settings:", e);
   }
-  return { 
-    order: DEFAULT_LAYOUT_ORDER, 
-    design: DEFAULT_DESIGN 
+  return {
+    order: DEFAULT_LAYOUT_ORDER,
+    design: DEFAULT_DESIGN,
   };
 }

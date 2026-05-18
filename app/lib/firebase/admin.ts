@@ -1,10 +1,11 @@
-import * as admin from 'firebase-admin';
-import firebaseConfig from '../../../firebase-applet-config.json';
+import * as admin from "firebase-admin";
+import firebaseConfig from "../../../firebase-applet-config.json";
 
 if (!admin.apps.length) {
   try {
-    const projectId = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || firebaseConfig.projectId;
-    
+    const projectId =
+      process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || firebaseConfig.projectId;
+
     // Check if we have explicit service account credentials (needed for Vercel)
     if (process.env.FIREBASE_PRIVATE_KEY && process.env.FIREBASE_CLIENT_EMAIL) {
       admin.initializeApp({
@@ -13,7 +14,7 @@ if (!admin.apps.length) {
           projectId: projectId,
           clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
           // Handle newline characters in the private key correctly
-          privateKey: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n'),
+          privateKey: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, "\n"),
         }),
       });
     } else {
@@ -23,7 +24,7 @@ if (!admin.apps.length) {
       });
     }
   } catch (error) {
-    console.error('Firebase admin initialization error:', error);
+    console.error("Firebase admin initialization error:", error);
   }
 }
 

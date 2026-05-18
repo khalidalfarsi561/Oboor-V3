@@ -6,26 +6,47 @@ import { revalidateTag } from "next/cache";
 import { GoogleGenAI } from "@google/genai";
 
 const ALLOWED_STYLE_PROPS = [
-  "backgroundColor", "color",
-  "padding", "paddingTop", "paddingBottom", "paddingLeft", "paddingRight",
-  "margin", "marginTop", "marginBottom", "marginLeft", "marginRight",
-  "borderRadius", "borderWidth", "borderColor", "borderStyle",
-  "fontSize", "fontWeight", "letterSpacing", "lineHeight", "textAlign",
+  "backgroundColor",
+  "color",
+  "padding",
+  "paddingTop",
+  "paddingBottom",
+  "paddingLeft",
+  "paddingRight",
+  "margin",
+  "marginTop",
+  "marginBottom",
+  "marginLeft",
+  "marginRight",
+  "borderRadius",
+  "borderWidth",
+  "borderColor",
+  "borderStyle",
+  "fontSize",
+  "fontWeight",
+  "letterSpacing",
+  "lineHeight",
+  "textAlign",
   "boxShadow",
-  "flexDirection", "alignItems", "justifyContent", "gap"
+  "flexDirection",
+  "alignItems",
+  "justifyContent",
+  "gap",
 ];
 
 export async function generateDesignPatch(
-  elementId: string, 
-  currentStyle: any, 
+  adminUid: string,
+  elementId: string,
+  currentStyle: any,
   userPrompt: string
 ): Promise<{ success: boolean; patch?: Record<string, any>; error?: string }> {
   try {
+    await assertAdmin(adminUid);
     const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) throw new Error("GEMINI_API_KEY is not configured on the server.");
 
     const ai = new GoogleGenAI({ apiKey });
-    
+
     const aiPrompt = `You are an expert Frontend AI Stylist. 
 Selected Element ID: ${elementId}
 Current Style JSON: ${JSON.stringify(currentStyle)}
@@ -41,14 +62,14 @@ Rules:
 Example: {"backgroundColor": "#ff0000", "borderRadius": "12px"}`;
 
     const response = await ai.models.generateContent({
-      model: "gemini-1.5-flash", 
+      model: "gemini-1.5-flash",
       contents: aiPrompt,
     });
-    
+
     const responseText = response.text;
     if (!responseText) throw new Error("AI returned empty response");
     const rawJson = responseText.replace(/```json|```/g, "").trim();
-    
+
     let patch;
     try {
       patch = JSON.parse(rawJson);
@@ -77,7 +98,7 @@ export async function askAdminAI(userPrompt: string, history?: any[]) {
     if (!apiKey) throw new Error("GEMINI_API_KEY not configured.");
 
     const ai = new GoogleGenAI({ apiKey });
-    
+
     const response = await ai.models.generateContent({
       model: "gemini-1.5-flash",
       contents: userPrompt,
@@ -92,22 +113,22 @@ export async function askAdminAI(userPrompt: string, history?: any[]) {
 // Cache the admin verification since it happens inside layout
 export async function verifyServerAdmin(uid: string, email: string): Promise<boolean> {
   if (!uid || !email) return false;
-  
+
   const adminRef = adminDb.collection("admins").doc(uid);
   const adminDoc = await adminRef.get();
-  
+
   if (adminDoc.exists) {
     return true;
   }
-  
+
   return false;
 }
 
 async function assertAdmin(uid: string) {
   if (!uid) throw new Error("غير مصرح.");
-  
+
   const adminDoc = await adminDb.collection("admins").doc(uid).get();
-  
+
   if (!adminDoc.exists) {
     throw new Error("غير مصرح.");
   }
@@ -119,17 +140,21 @@ export async function saveSiteSettings(
   adminUid: string,
   layoutOrder: LayoutSectionId[],
   designSpecs?: Record<string, DesignPatch>
-): Promise<{success: boolean; error?: string}> {
+): Promise<{ success: boolean; error?: string }> {
   try {
     await assertAdmin(adminUid);
-    const data: { order: LayoutSectionId[], updatedAt: Date, design?: Record<string, DesignPatch> } = {
+    const data: {
+      order: LayoutSectionId[];
+      updatedAt: Date;
+      design?: Record<string, DesignPatch>;
+    } = {
       order: layoutOrder,
       updatedAt: new Date(),
     };
     if (designSpecs) {
       data.design = designSpecs;
     }
-    await adminDb.collection('settings').doc('layout').set(data, { merge: true });
+    await adminDb.collection("settings").doc("layout").set(data, { merge: true });
     revalidateTag("site-settings");
     return { success: true };
   } catch (e: any) {
@@ -140,16 +165,19 @@ export async function saveSiteSettings(
 export async function getDashboardStats() {
   const usersSnap = await adminDb.collection("users").count().get();
   const codesSnap = await adminDb.collection("rewardCodes").count().get();
-  
+
   return {
     usersC: usersSnap.data().count,
-    codesC: codesSnap.data().count
+    codesC: codesSnap.data().count,
   };
 }
 
 export async function updateItemStock(itemId: number, newStock: number) {
   try {
-    const stockDocs = await adminDb.collection("storeItems").where("itemId", "==", itemId).get();
+    const stockDocs = await adminDb
+      .collection("storeItems")
+      .where("itemId", "==", itemId)
+      .get();
     if (stockDocs.empty) {
       await adminDb.collection("storeItems").add({ itemId, stock: newStock });
     } else {
@@ -158,10 +186,13 @@ export async function updateItemStock(itemId: number, newStock: number) {
 
     // If stock became positive, "notify" users
     if (newStock > 0) {
-      const subscriptions = await adminDb.collection("stockNotifications").where("itemId", "==", itemId).get();
-      
+      const subscriptions = await adminDb
+        .collection("stockNotifications")
+        .where("itemId", "==", itemId)
+        .get();
+
       const batch = adminDb.batch();
-      subscriptions.docs.forEach(doc => {
+      subscriptions.docs.forEach((doc) => {
         const userId = doc.data().userId;
         const msgRef = adminDb.collection("userNotifications").doc();
         batch.set(msgRef, {
@@ -169,7 +200,7 @@ export async function updateItemStock(itemId: number, newStock: number) {
           message: `المنتج الذي كنت تنتظره متوفر الآن!`,
           type: "stock_update",
           createdAt: new Date(),
-          read: false
+          read: false,
         });
         batch.delete(doc.ref);
       });
