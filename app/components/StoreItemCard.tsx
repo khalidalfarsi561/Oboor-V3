@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Package, Loader2, Bell, BellOff } from "lucide-react";
+import { Loader2, Bell, BellOff } from "lucide-react";
+import Image from "next/image";
 import { StoreItem } from "../lib/data";
 import { toggleStockNotification, getSubscriptionStatus } from "../actions/store";
 import { useAuth } from "./AuthProvider";
@@ -50,8 +51,14 @@ export function StoreItemCard({
         )}
       </div>
 
-      <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-slate-50 transition-all duration-300 group-hover:scale-110 group-hover:bg-blue-50">
-        <Package className={`h-8 w-8 ${item.iconColor}`} />
+      <div className="mb-6 flex h-16 w-16 items-center justify-center overflow-hidden rounded-2xl bg-slate-50 transition-all duration-300 group-hover:scale-110 group-hover:bg-blue-50">
+        <Image
+          src="/images/capcut.png"
+          alt="CapCut"
+          width={48}
+          height={48}
+          className="object-contain"
+        />
       </div>
 
       <h3 className="mb-2 text-xl font-bold text-slate-900">{item.name}</h3>
