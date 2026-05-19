@@ -21,11 +21,11 @@ export function HomeHeader({ user, balance, signIn, signOut, design }: HomeHeade
   const getStyle = (id: string) => mapDesignPatchToStyle(design[id] || {});
 
   // Placeholder for the logo URL - user can replace this
-  const LOGO_URL = "https://i.ibb.co/qYVNPk3z/202604212003.jpg"; // Replace with real logo URL
+  const LOGO_URL = "https://i.ibb.co/sJd2xZ7V/oboor-logo.png"; // Replace with real logo URL
 
   return (
     <header
-      className="group/nav mb-8 flex flex-row items-center justify-between gap-3 px-4 sm:px-0 md:mb-16"
+      className="group/nav mb-3 flex flex-row items-center justify-between gap-3 px-4 py-2 sm:px-0 md:mb-6"
       style={getStyle("nav")}
     >
       {/* Sign In Section - Exact match for image for mobile */}
@@ -33,7 +33,7 @@ export function HomeHeader({ user, balance, signIn, signOut, design }: HomeHeade
         {user ? (
           <div className="flex items-center gap-2">
             {/* Minimal Mobile view for logged in user */}
-            <div className="flex items-center gap-2 md:hidden">
+            <div className="relative -top-1 flex items-center gap-2 md:hidden">
               <UserAvatar src={user.photoURL} alt={user.displayName} size={32} />
               <button
                 onClick={signOut}
@@ -120,22 +120,18 @@ export function HomeHeader({ user, balance, signIn, signOut, design }: HomeHeade
       </div>
 
       {/* Brand / Logo Section - On the Right for Mobile */}
-      <div className="order-2 flex items-center md:order-1" style={getStyle("brand")}>
-        {/* Mobile Logo (Exactly like image) */}
-        <div className="flex items-center md:hidden">
-          <Link href="/">
+      <div className="flex min-w-0 items-center justify-start" style={getStyle("brand")}>
+        {/* Mobile Logo */}
+        <div className="relative -top-1 order-1 flex min-w-0 items-center justify-start md:order-1">
+          <Link href="/" className="flex min-w-0 items-center">
             <Image
               src={LOGO_URL}
               alt="Logo"
-              width={244}
-              height={117}
-              style={{
-                width: "clamp(150px, 55vw, 244px)",
-                height: "auto",
-                mixBlendMode: "multiply",
-              }}
-              className="bg-transparent object-contain"
+              width={180}
+              height={70}
+              className="h-auto w-[clamp(85px,26vw,140px)] object-contain mix-blend-multiply"
               referrerPolicy="no-referrer"
+              priority
             />
           </Link>
         </div>
