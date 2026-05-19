@@ -1,6 +1,7 @@
 "use server";
 
 import { adminDb, adminAuth } from "../lib/firebase/admin";
+import { assertRateLimit } from "../lib/rate-limit";
 import { revalidateTag } from "next/cache";
 
 import { GoogleGenAI } from "@google/genai";
@@ -42,6 +43,7 @@ export async function generateDesignPatch(
 ): Promise<{ success: boolean; patch?: Record<string, any>; error?: string }> {
   try {
     await assertAdminToken(idToken);
+    await assertRateLimit(`admin-ai-style:${elementId}`, 20, 60 * 1000);
     const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) throw new Error("GEMINI_API_KEY is not configured on the server.");
 
@@ -81,17 +83,47 @@ Example: {"backgroundColor": "#ff0000", "borderRadius": "12px"}`;
 
     const BLOCKED_CSS_PATTERNS = ["javascript", "url(", "expression(", "var(", "@import"];
 
+    function isSafeCssValue(key: string, value: string) {
+      const lower = value.toLowerCase();
+
+      if (!SAFE_CSS_VALUE.test(value)) return false;
+      if (BLOCKED_CSS_PATTERNS.some((pattern) => lower.includes(pattern))) return false;
+
+      const pxMatch = value.match(/^(\d+)px$/);
+      if (pxMatch) {
+        const num = Number(pxMatch[1]);
+
+        if (["fontSize", "borderRadius", "gap", "letterSpacing"].includes(key)) {
+          return num <= 80;
+        }
+
+        if (
+          [
+            "padding",
+            "paddingTop",
+            "paddingBottom",
+            "paddingLeft",
+            "paddingRight",
+            "margin",
+            "marginTop",
+            "marginBottom",
+            "marginLeft",
+            "marginRight",
+          ].includes(key)
+        ) {
+          return num <= 120;
+        }
+      }
+
+      return true;
+    }
+
     const sanitizedPatch: Record<string, any> = {};
     for (const key in patch) {
       const value = patch[key];
 
       if (ALLOWED_STYLE_PROPS.includes(key) && typeof value === "string") {
-        const lowerValue = value.toLowerCase();
-
-        if (
-          SAFE_CSS_VALUE.test(value) &&
-          !BLOCKED_CSS_PATTERNS.some((pattern) => lowerValue.includes(pattern))
-        ) {
+        if (isSafeCssValue(key, value)) {
           sanitizedPatch[key] = value;
         }
       }
@@ -106,7 +138,8 @@ Example: {"backgroundColor": "#ff0000", "borderRadius": "12px"}`;
 
 export async function askAdminAI(idToken: string, userPrompt: string, history?: any[]) {
   try {
-    await assertAdminToken(idToken);
+    const adminId = await assertAdminToken(idToken);
+    await assertRateLimit(`admin-ai-chat:${adminId}`, 15, 60 * 1000);
     const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) throw new Error("GEMINI_API_KEY not configured.");
 

@@ -1,6 +1,7 @@
 "use server";
 
 import { adminDb, adminAuth } from "../lib/firebase/admin";
+import { assertRateLimit } from "../lib/rate-limit";
 import { FieldValue } from "firebase-admin/firestore";
 import { headers, cookies } from "next/headers";
 
@@ -81,6 +82,7 @@ export async function initiateClaimIntent(
   if (!idToken || !linkId) return { success: false, error: "Missing parameters" };
 
   const userId = await getUidFromToken(idToken);
+  await assertRateLimit(`intent:${userId}:${linkId}`, 5, 60 * 1000);
 
   try {
     const { ip, deviceId, userAgent } = await getClientFraudData();
@@ -132,6 +134,7 @@ export async function generateRewardCode(
   if (!idToken || !linkId) return { success: false, error: "Missing parameters" };
 
   const userId = await getUidFromToken(idToken);
+  await assertRateLimit(`generate-code:${userId}:${linkId}`, 3, 60 * 1000);
 
   try {
     const generatedCode = await adminDb.runTransaction(async (transaction) => {
@@ -254,6 +257,7 @@ export async function claimRewardCode(
   if (!idToken || !codeStr) return { success: false, error: "Missing parameters" };
 
   const userId = await getUidFromToken(idToken);
+  await assertRateLimit(`claim-code:${userId}`, 10, 60 * 1000);
   const parsedCode = codeStr.trim().toUpperCase();
   if (parsedCode.length !== 8) return { success: false, error: "Invalid code" };
 

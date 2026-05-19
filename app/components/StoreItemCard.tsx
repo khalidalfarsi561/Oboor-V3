@@ -41,14 +41,14 @@ export function StoreItemCard({
     >
       <div className="absolute top-6 left-6" dir="ltr">
         {isOutOfStock ? (
-  <span className="rounded-full border border-red-100 bg-red-50 px-3 py-1 text-xs font-bold text-red-600">
-    غير متوفر
-  </span>
-) : (
-  <span className="rounded-full border border-blue-100 bg-blue-50 px-3 py-1 text-xs font-bold text-blue-600">
-     المتبقي :  {stock}
-  </span>
-)}
+          <span className="rounded-full border border-red-100 bg-red-50 px-3 py-1 text-xs font-bold text-red-600">
+            غير متوفر
+          </span>
+        ) : (
+          <span className="rounded-full border border-blue-100 bg-blue-50 px-3 py-1 text-xs font-bold text-blue-600">
+            المتبقي : {stock}
+          </span>
+        )}
       </div>
 
       <div className="mb-6 flex h-16 w-16 items-center justify-center overflow-hidden rounded-2xl bg-slate-50 transition-all duration-300 group-hover:scale-110 group-hover:bg-blue-50">
@@ -62,7 +62,6 @@ export function StoreItemCard({
       </div>
 
       <h3 className="mb-2 text-xl font-bold text-slate-900">{item.name}</h3>
-      
 
       <div
         className="mb-4 flex items-center gap-2 text-2xl font-bold text-blue-600"

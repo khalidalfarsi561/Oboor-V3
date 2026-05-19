@@ -60,7 +60,6 @@ export async function purchaseItem(
     }
 
     const accountDoc = accountSnap.docs[0];
-    const accountData = accountDoc.data();
 
     transaction.update(accountDoc.ref, {
       status: "sold",
@@ -75,19 +74,18 @@ export async function purchaseItem(
       itemName,
       price,
       accountId: accountDoc.id,
-      accountData,
       createdAt: FieldValue.serverTimestamp(),
     });
 
     transaction.update(userRef, {
-  balance: currentBalance - price,
-});
-
-return {
-  email: accountData.email || "",
-  password: accountData.password || "",
-};
+      balance: currentBalance - price,
     });
+
+    return {
+      email: accountDoc.data().email || "",
+      password: accountDoc.data().password || "",
+    };
+  });
 
   return {
     success: true,

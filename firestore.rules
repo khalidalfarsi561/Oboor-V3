@@ -52,5 +52,17 @@ service cloud.firestore {
     match /capcutAccounts/{accountId} {
       allow read, write: if isAdmin();
     }
+
+    match /rateLimits/{docId} {
+      allow read, write: if false;
+    }
+
+    match /userIntents/{intentId} {
+      allow read, write: if false;
+    }
+
+    match /adminLogs/{logId} {
+      allow read, write: if false;
+    }
   }
 }
