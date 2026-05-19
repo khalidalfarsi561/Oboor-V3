@@ -48,5 +48,9 @@ service cloud.firestore {
       allow read: if isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin());
       allow write: if isAdmin();
     }
+
+    match /capcutAccounts/{accountId} {
+      allow read, write: if isAdmin();
+    }
   }
 }

@@ -13,16 +13,16 @@ async function getUidFromToken(idToken: string): Promise<string> {
 export const getStoreStock = unstable_cache(
   async () => {
     try {
-      const snap = await adminDb.collection("storeItems").get();
-      const stockMap: Record<number, number> = {};
-      snap.docs.forEach((doc) => {
-        stockMap[doc.data().itemId] = doc.data().stock;
-      });
-      return stockMap;
+      const snap = await adminDb
+        .collection("capcutAccounts")
+        .where("status", "==", "available")
+        .count()
+        .get();
+
+      return { 1: snap.data().count };
     } catch (err) {
-      console.warn("Failed to fetch store inventory during build:", err);
-      // Return empty map on build fail so build doesn't crash
-      return {};
+      console.warn("Failed to fetch CapCut inventory:", err);
+      return { 1: 0 };
     }
   },
   ["store-items"],
@@ -49,17 +49,29 @@ export async function purchaseItem(
     }
 
     // Optional: check stock on server
-    const stockDocs = await transaction.get(
-      adminDb.collection("storeItems").where("itemId", "==", itemId)
-    );
-    if (!stockDocs.empty) {
-      const stockDoc = stockDocs.docs[0];
-      const stock = stockDoc.data().stock;
-      if (stock <= 0) {
-        throw new Error("عذراً، هذا المنتج غير متوفر حالياً.");
-      }
-      transaction.update(stockDoc.ref, { stock: stock - 1 });
+    if (itemId !== 1) {
+      throw new Error("منتج غير مدعوم حالياً.");
     }
+
+    const accountQuery = adminDb
+      .collection("capcutAccounts")
+      .where("status", "==", "available")
+      .limit(1);
+
+    const accountSnap = await transaction.get(accountQuery);
+
+    if (accountSnap.empty) {
+      throw new Error("عذراً، هذا المنتج غير متوفر حالياً.");
+    }
+
+    const accountDoc = accountSnap.docs[0];
+    const accountData = accountDoc.data();
+
+    transaction.update(accountDoc.ref, {
+      status: "sold",
+      soldTo: userId,
+      soldAt: FieldValue.serverTimestamp(),
+    });
 
     const newPurchaseRef = adminDb.collection("purchases").doc();
     transaction.set(newPurchaseRef, {
@@ -67,6 +79,8 @@ export async function purchaseItem(
       itemId,
       itemName,
       price,
+      accountId: accountDoc.id,
+      accountData,
       createdAt: FieldValue.serverTimestamp(),
     });
 

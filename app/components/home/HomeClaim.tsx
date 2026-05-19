@@ -45,7 +45,7 @@ export const HomeClaim = ({
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-[1fr_auto] sm:gap-4">
             <input
               type="text"
-              placeholder="أدخل الكود (مثال: ABCD1234)"
+              placeholder="أدخل الكود"
               className={`w-full border bg-white ${errorMsg ? "border-red-400 focus:border-red-500 focus:ring-red-500/10" : "border-slate-200 focus:border-blue-600 focus:ring-blue-600/10"} rounded-2xl px-5 py-3.5 text-center font-mono text-lg tracking-widest text-slate-900 uppercase transition-all placeholder:text-slate-400 focus:ring-4 focus:outline-none focus-visible:ring-offset-1 sm:text-right`}
               value={code}
               maxLength={8}
