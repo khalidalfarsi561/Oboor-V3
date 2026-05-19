@@ -1,6 +1,5 @@
 "use server";
 
-import { unstable_cache } from "next/cache";
 import { adminDb, adminAuth } from "../lib/firebase/admin";
 import { FieldValue } from "firebase-admin/firestore";
 
@@ -10,24 +9,20 @@ async function getUidFromToken(idToken: string): Promise<string> {
   return decoded.uid;
 }
 
-export const getStoreStock = unstable_cache(
-  async () => {
-    try {
-      const snap = await adminDb
-        .collection("capcutAccounts")
-        .where("status", "==", "available")
-        .count()
-        .get();
+export async function getStoreStock() {
+  try {
+    const snap = await adminDb
+      .collection("capcutAccounts")
+      .where("status", "==", "available")
+      .count()
+      .get();
 
-      return { 1: snap.data().count };
-    } catch (err) {
-      console.warn("Failed to fetch CapCut inventory:", err);
-      return { 1: 0 };
-    }
-  },
-  ["store-items"],
-  { tags: ["store-items"] }
-);
+    return { 1: snap.data().count };
+  } catch (err) {
+    console.warn("Failed to fetch CapCut inventory:", err);
+    return { 1: 0 };
+  }
+}
 
 export async function purchaseItem(
   idToken: string,
@@ -37,7 +32,7 @@ export async function purchaseItem(
 ) {
   const userId = await getUidFromToken(idToken);
 
-  await adminDb.runTransaction(async (transaction) => {
+  const purchasedAccount = await adminDb.runTransaction(async (transaction) => {
     const userRef = adminDb.collection("users").doc(userId);
     const userSnap = await transaction.get(userRef);
 
@@ -85,9 +80,19 @@ export async function purchaseItem(
     });
 
     transaction.update(userRef, {
-      balance: currentBalance - price,
+  balance: currentBalance - price,
+});
+
+return {
+  email: accountData.email || "",
+  password: accountData.password || "",
+};
     });
-  });
+
+  return {
+    success: true,
+    account: purchasedAccount,
+  };
 }
 
 export async function toggleStockNotification(idToken: string, itemId: number) {
