@@ -179,17 +179,21 @@ export async function generateRewardCode(
 
       const ip = intentData?.ip || "unknown";
       const deviceId = intentData?.deviceId || "unknown";
-      const ipClaimRef = adminDb.collection("linkClaims").doc(`IP_${ip}_${linkId}`);
-      const devClaimRef = adminDb
-        .collection("linkClaims")
-        .doc(`DEV_${deviceId}_${linkId}`);
 
-      const claimSnap = await transaction.get(claimRef);
-      const ipSnap = await transaction.get(ipClaimRef);
-      const devSnap = await transaction.get(devClaimRef);
+      const lockRefs = [claimRef];
+
+      if (ip !== "unknown") {
+        lockRefs.push(adminDb.collection("linkClaims").doc(`IP_${ip}_${linkId}`));
+      }
+
+      if (deviceId !== "unknown") {
+        lockRefs.push(adminDb.collection("linkClaims").doc(`DEV_${deviceId}_${linkId}`));
+      }
+
+      const lockSnaps = await Promise.all(lockRefs.map((ref) => transaction.get(ref)));
 
       // Lock check across User, IP, and Device
-      for (const snap of [claimSnap, ipSnap, devSnap]) {
+      for (const snap of lockSnaps) {
         if (snap.exists) {
           const lastGen = snap.data()?.lastGeneratedAt;
           if (lastGen) {
@@ -237,9 +241,21 @@ export async function generateRewardCode(
       };
 
       transaction.set(claimRef, claimData, { merge: true });
-      transaction.set(ipClaimRef, claimData, { merge: true });
+
+      if (ip !== "unknown") {
+        transaction.set(
+          adminDb.collection("linkClaims").doc(`IP_${ip}_${linkId}`),
+          claimData,
+          { merge: true }
+        );
+      }
+
       if (deviceId !== "unknown") {
-        transaction.set(devClaimRef, claimData, { merge: true });
+        transaction.set(
+          adminDb.collection("linkClaims").doc(`DEV_${deviceId}_${linkId}`),
+          claimData,
+          { merge: true }
+        );
       }
 
       // Invalidate intent so it can't be reused for bypassed regeneration
