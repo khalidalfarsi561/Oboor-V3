@@ -50,7 +50,12 @@ export const HomeClaim = ({
               value={code}
               maxLength={8}
               onChange={(e) => {
-                setCode(e.target.value.toUpperCase());
+                const cleanCode = e.target.value
+                  .toUpperCase()
+                  .replace(/[^A-Z0-9]/g, "")
+                  .slice(0, 8);
+
+                setCode(cleanCode);
                 setErrorMsg("");
               }}
             />

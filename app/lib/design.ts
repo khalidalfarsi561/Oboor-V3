@@ -46,7 +46,9 @@ export function mapDesignPatchToStyle(patch: DesignPatch): CSSProperties {
 
   // Add other properties if needed
   Object.keys(patch).forEach((key) => {
-    if (!style[key]) style[key] = patch[key];
+    if (style[key] === undefined) {
+      style[key] = patch[key];
+    }
   });
 
   return style as CSSProperties;

@@ -78,7 +78,7 @@ export const StoreItems = memo(function StoreItems({
     setPurchasingId(item.id);
     try {
       const idToken = await user.getIdToken();
-      const res = await purchaseItem(idToken, item.id, item.name, item.price);
+      const res = await purchaseItem(idToken, item.id);
 
       if (res?.account) {
         setPurchasedAccount(res.account);

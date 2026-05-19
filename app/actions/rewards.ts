@@ -258,8 +258,14 @@ export async function claimRewardCode(
 
   const userId = await getUidFromToken(idToken);
   await assertRateLimit(`claim-code:${userId}`, 10, 60 * 1000);
-  const parsedCode = codeStr.trim().toUpperCase();
-  if (parsedCode.length !== 8) return { success: false, error: "Invalid code" };
+  const parsedCode = codeStr
+    .trim()
+    .toUpperCase()
+    .replace(/[^A-Z0-9]/g, "");
+
+  if (!/^[A-Z0-9]{8}$/.test(parsedCode)) {
+    return { success: false, error: "Invalid code" };
+  }
 
   try {
     const amount = await adminDb.runTransaction(async (transaction) => {

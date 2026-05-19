@@ -24,13 +24,24 @@ export async function getStoreStock() {
   }
 }
 
-export async function purchaseItem(
-  idToken: string,
-  itemId: number,
-  itemName: string,
-  price: number
-) {
+const STORE_ITEMS: Record<number, { name: string; price: number }> = {
+  1: {
+    name: "CapCut Pro Account",
+    price: 1,
+  },
+};
+
+export async function purchaseItem(idToken: string, itemId: number) {
   const userId = await getUidFromToken(idToken);
+
+  const item = STORE_ITEMS[itemId];
+
+  if (!item) {
+    throw new Error("منتج غير مدعوم حالياً.");
+  }
+
+  const itemName = item.name;
+  const price = item.price;
 
   const purchasedAccount = await adminDb.runTransaction(async (transaction) => {
     const userRef = adminDb.collection("users").doc(userId);
@@ -41,11 +52,6 @@ export async function purchaseItem(
 
     if (currentBalance < price) {
       throw new Error("رصيد غير كافٍ.");
-    }
-
-    // Optional: check stock on server
-    if (itemId !== 1) {
-      throw new Error("منتج غير مدعوم حالياً.");
     }
 
     const accountQuery = adminDb
@@ -78,7 +84,7 @@ export async function purchaseItem(
     });
 
     transaction.update(userRef, {
-      balance: currentBalance - price,
+      balance: FieldValue.increment(-price),
     });
 
     return {
