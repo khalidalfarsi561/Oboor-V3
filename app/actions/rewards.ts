@@ -33,10 +33,11 @@ async function getClientFraudData() {
   if (!deviceId) {
     deviceId = crypto.randomUUID();
     cookieStore.set("device_fingerprint", deviceId, {
-      maxAge: 60 * 60 * 24 * 365 * 10, // 10 years
+      maxAge: 60 * 60 * 24 * 365,
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
+      sameSite: "strict",
+      path: "/",
     });
   }
 
@@ -92,12 +93,19 @@ export async function initiateClaimIntent(
     }
 
     // Check pre-locks for IP and Device to prevent generating wasted intents
-    const ipClaimRef = adminDb.collection("linkClaims").doc(`IP_${ip}_${linkId}`);
-    const devClaimRef = adminDb.collection("linkClaims").doc(`DEV_${deviceId}_${linkId}`);
+    const claimRefs = [];
 
-    const [ipSnap, devSnap] = await Promise.all([ipClaimRef.get(), devClaimRef.get()]);
+    if (ip !== "unknown") {
+      claimRefs.push(adminDb.collection("linkClaims").doc(`IP_${ip}_${linkId}`));
+    }
 
-    for (const snap of [ipSnap, devSnap]) {
+    if (deviceId !== "unknown") {
+      claimRefs.push(adminDb.collection("linkClaims").doc(`DEV_${deviceId}_${linkId}`));
+    }
+
+    const claimSnaps = await Promise.all(claimRefs.map((ref) => ref.get()));
+
+    for (const snap of claimSnaps) {
       if (snap.exists) {
         const lastGen = snap.data()?.lastGeneratedAt;
         if (lastGen && Date.now() - lastGen.toMillis() < 86400000) {
@@ -286,22 +294,22 @@ export async function claimRewardCode(
 
       const amountToAdd = codeData?.amount || 1;
 
-      if (!userSnap.exists) {
-        transaction.set(userRef, {
-          uid: userId,
-          balance: 0,
-          createdAt: FieldValue.serverTimestamp(),
-        });
-      }
-
       transaction.update(codeRef, {
         isUsed: true,
         usedBy: userId,
+        usedAt: FieldValue.serverTimestamp(),
       });
 
-      transaction.update(userRef, {
-        balance: FieldValue.increment(amountToAdd),
-      });
+      transaction.set(
+        userRef,
+        {
+          uid: userId,
+          balance: FieldValue.increment(amountToAdd),
+          updatedAt: FieldValue.serverTimestamp(),
+          ...(userSnap.exists ? {} : { createdAt: FieldValue.serverTimestamp() }),
+        },
+        { merge: true }
+      );
 
       return amountToAdd;
     });

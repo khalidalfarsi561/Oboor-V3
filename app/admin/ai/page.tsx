@@ -23,7 +23,9 @@ export default function AiAssistant() {
 
     const userPrompt = input.trim();
     setInput("");
-    setMessages((prev) => [...prev, { role: "user", text: userPrompt }]);
+    setMessages((prev) =>
+      [...prev, { role: "user" as const, text: userPrompt }].slice(-30)
+    );
 
     startTransition(async () => {
       try {
@@ -42,16 +44,20 @@ User Admin Query: ${userPrompt}`;
         const res = await askAdminAI(idToken, fullPrompt, []);
 
         if (res.success && res.text) {
-          setMessages((prev) => [...prev, { role: "ai", text: res.text! }]);
+          setMessages((prev) =>
+            [...prev, { role: "ai" as const, text: res.text! }].slice(-30)
+          );
         } else {
           throw new Error(res.error || "No response from AI.");
         }
       } catch (err: any) {
         console.error("AI Assistant Error:", err);
-        setMessages((prev) => [
-          ...prev,
-          { role: "ai", text: `خطأ في الاتصال: ${err.message}` },
-        ]);
+        setMessages((prev) =>
+          [
+            ...prev,
+            { role: "ai" as const, text: `خطأ في الاتصال: ${err.message}` },
+          ].slice(-30)
+        );
       }
     });
   };

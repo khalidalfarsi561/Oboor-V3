@@ -91,7 +91,7 @@ export function BuilderPreview({
     <div className="scrollbar-hide flex flex-1 items-start justify-center overflow-y-auto p-4 sm:p-8 lg:p-12">
       <motion.div
         layout
-        className={`relative min-h-screen origin-top bg-white shadow-[0_0_100px_rgba(0,0,0,0.5)] transition-all duration-700 ${
+        className={`relative min-h-screen origin-top bg-white shadow-2xl transition-all duration-700 ${
           viewMode === "mobile"
             ? "w-[375px] overflow-hidden rounded-[50px] border-[12px] border-[#1a1a1a]"
             : "w-full max-w-5xl rounded-2xl"

@@ -165,6 +165,29 @@ export async function askAdminAI(idToken: string, userPrompt: string, history?: 
     const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) throw new Error("GEMINI_API_KEY not configured.");
 
+    const blockedPromptWords = [
+      "system prompt",
+      "environment",
+      "env",
+      "secret",
+      "token",
+      "api key",
+      "firebase credential",
+      "private key",
+      "bypass",
+      "exploit",
+    ];
+
+    const normalizedPrompt = userPrompt.toLowerCase();
+
+    if (blockedPromptWords.some((word) => normalizedPrompt.includes(word))) {
+      await writeAdminLog(adminId, "blocked_admin_ai_prompt", {
+        reason: "sensitive_prompt",
+      });
+
+      throw new Error("هذا الطلب غير مسموح لأسباب أمنية.");
+    }
+
     const ai = new GoogleGenAI({ apiKey });
 
     const safePrompt = `
