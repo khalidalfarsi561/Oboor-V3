@@ -208,10 +208,28 @@ export function SecretClient({ linkId, token }: { linkId: string; token: string 
                 <div className="mx-auto mb-8 flex h-20 w-20 items-center justify-center rounded-2xl bg-red-50">
                   <AlertCircle className="h-10 w-10 text-red-500" strokeWidth={2.5} />
                 </div>
-                <h1 className="mb-4 text-2xl font-bold text-slate-900">تم الرفض</h1>
-                <p className="mb-6 rounded-xl bg-red-50 p-4 text-base leading-relaxed font-medium text-balance break-words text-red-600 sm:text-lg">
+                <h1 className="mb-4 text-2xl font-bold text-slate-900">
+                  تم تعليق الوصول
+                </h1>
+                <p className="mb-6 rounded-xl bg-red-50 p-4 text-sm leading-relaxed font-medium text-red-600 sm:text-base">
                   {errorMessage}
                 </p>
+
+                {errorMessage.includes("VPN") ? (
+                  <button
+                    onClick={() => window.location.reload()}
+                    className="w-full rounded-2xl bg-blue-600 px-8 py-3.5 text-base font-bold text-white shadow-md transition-colors hover:bg-blue-700"
+                  >
+                    أغلقت الـ VPN، أعد الفحص الآن
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => router.push("/")}
+                    className="w-full rounded-2xl bg-slate-950 px-8 py-3.5 text-base font-bold text-white shadow-md transition-colors hover:bg-slate-800"
+                  >
+                    العودة للرئيسية
+                  </button>
+                )}
 
                 {errorMessage.includes("ساعة") &&
                   process.env.NODE_ENV === "development" && (
@@ -221,7 +239,7 @@ export function SecretClient({ linkId, token }: { linkId: string; token: string 
                         await deleteDoc(doc(db, "linkClaims", `${user.uid}_${linkId}`));
                         window.location.reload();
                       }}
-                      className="text-sm font-medium text-slate-400 underline transition-colors hover:text-blue-600"
+                      className="mx-auto mt-4 block text-sm font-medium text-slate-400 underline transition-colors hover:text-blue-600"
                     >
                       🛠️ مطور: إعادة تعيين قفل الـ 24 ساعة للتجربة
                     </button>

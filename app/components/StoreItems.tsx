@@ -10,10 +10,19 @@ import {
   purchaseItem,
   getStockNotificationMap,
   toggleStockNotification,
+  getUserPurchases,
 } from "../actions/store";
 import { StoreItemCard, StoreItemSkeleton } from "./StoreItemCard";
 
 type PurchasedAccount = {
+  email: string;
+  password: string;
+};
+
+type PastPurchase = {
+  id: string;
+  itemName: string;
+  createdAt: number;
   email: string;
   password: string;
 };
@@ -31,6 +40,8 @@ export const StoreItems = memo(function StoreItems({
   const [purchasingId, setPurchasingId] = useState<number | null>(null);
   const [notificationMap, setNotificationMap] = useState<Record<number, boolean>>({});
   const [purchasedAccount, setPurchasedAccount] = useState<PurchasedAccount | null>(null);
+  const [historyOpen, setHistoryOpen] = useState(false);
+  const [pastPurchases, setPastPurchases] = useState<PastPurchase[]>([]);
 
   useEffect(() => {
     if (user) {
@@ -54,8 +65,24 @@ export const StoreItems = memo(function StoreItems({
       } else {
         toast.info("تم إلغاء التنبيه.");
       }
-    } catch (e: any) {
-      toast.error(e.message);
+    } catch (e: unknown) {
+      toast.error(e instanceof Error ? e.message : "حدث خطأ غير متوقع.");
+    }
+  };
+
+  const fetchHistory = async () => {
+    if (!user) return;
+    try {
+      const idToken = await user.getIdToken();
+      const res = await getUserPurchases(idToken);
+      if (res.success && res.purchases) {
+        setPastPurchases(res.purchases);
+        setHistoryOpen(true);
+      } else {
+        toast.error(res.error || "تعذر جلب سجل المشتريات.");
+      }
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : "حدث خطأ غير متوقع.");
     }
   };
 
@@ -101,6 +128,14 @@ export const StoreItems = memo(function StoreItems({
         <h2 className="text-2xl font-bold tracking-tight text-slate-900">
           المنتجات المتوفرة
         </h2>
+        {user && (
+          <button
+            onClick={fetchHistory}
+            className="cursor-pointer rounded-xl bg-blue-50 px-4 py-2 text-xs font-bold text-blue-600 transition-all hover:bg-blue-100"
+          >
+            سجل مشترياتي
+          </button>
+        )}
       </div>
 
       <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
@@ -174,6 +209,57 @@ export const StoreItems = memo(function StoreItems({
                 <Copy className="h-4 w-4" />
                 نسخ بيانات الحساب
               </button>
+            </div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {historyOpen && (
+          <div className="fixed inset-0 z-[999] flex items-center justify-center bg-slate-950/60 p-4 backdrop-blur-sm">
+            <div className="max-h-[80vh] w-full max-w-md overflow-y-auto rounded-[32px] border border-white/20 bg-white p-6 shadow-2xl">
+              <div className="mb-4 flex items-center justify-between">
+                <h3 className="text-xl font-black text-slate-900">حساباتي المشتراة</h3>
+                <button
+                  onClick={() => setHistoryOpen(false)}
+                  className="rounded-full bg-slate-100 p-2 text-slate-500 hover:bg-slate-200"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
+              <div className="space-y-4" dir="ltr">
+                {pastPurchases.length === 0 ? (
+                  <p className="py-4 text-center text-sm text-slate-400">
+                    لم تقم بأي عمليات شراء بعد.
+                  </p>
+                ) : (
+                  pastPurchases.map((p) => (
+                    <div
+                      key={p.id}
+                      className="rounded-2xl border border-slate-100 bg-slate-50 p-4 text-left"
+                    >
+                      <p
+                        className="mb-2 text-right text-xs font-bold text-slate-400"
+                        dir="rtl"
+                      >
+                        {p.itemName}
+                      </p>
+                      <p className="mb-2 text-[10px] text-slate-400">
+                        EMAIL:{" "}
+                        <span className="font-mono text-xs font-bold text-slate-900">
+                          {p.email}
+                        </span>
+                      </p>
+                      <p className="text-[10px] text-slate-400">
+                        PASSWORD:{" "}
+                        <span className="font-mono text-xs font-bold text-slate-900">
+                          {p.password}
+                        </span>
+                      </p>
+                    </div>
+                  ))
+                )}
+              </div>
             </div>
           </div>
         )}

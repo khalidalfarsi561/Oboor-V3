@@ -148,3 +148,34 @@ export async function getStockNotificationMap(idToken: string, itemIds: number[]
     return {};
   }
 }
+
+export async function getUserPurchases(idToken: string) {
+  const userId = await getUidFromToken(idToken);
+  try {
+    const snap = await adminDb
+      .collection("purchases")
+      .where("userId", "==", userId)
+      .orderBy("createdAt", "desc")
+      .get();
+
+    const purchasePromises = snap.docs.map(async (purchaseDoc) => {
+      const pData = purchaseDoc.data();
+      const accountDoc = await adminDb
+        .collection("capcutAccounts")
+        .doc(pData.accountId)
+        .get();
+      return {
+        id: purchaseDoc.id,
+        itemName: pData.itemName,
+        createdAt: pData.createdAt?.toMillis() || Date.now(),
+        email: accountDoc.exists ? accountDoc.data()?.email : "غير متوفر",
+        password: accountDoc.exists ? accountDoc.data()?.password : "غير متوفر",
+      };
+    });
+
+    return { success: true, purchases: await Promise.all(purchasePromises) };
+  } catch (err: any) {
+    console.error("Error fetching purchases:", err);
+    return { success: false, error: err.message };
+  }
+}
