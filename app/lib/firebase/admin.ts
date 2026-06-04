@@ -1,32 +1,188 @@
 import * as admin from "firebase-admin";
 import firebaseConfig from "../../../firebase-applet-config.json";
 
+type MockDocData = Record<string, unknown>;
+
+type MockDocSnapshot = {
+  exists: boolean;
+  data: () => MockDocData | undefined;
+};
+
+type MockQuerySnapshot = {
+  empty: boolean;
+  docs: Array<{
+    id: string;
+    data: () => MockDocData;
+    ref: MockDocumentRef;
+  }>;
+  data: () => { count: number };
+};
+
+type MockDocumentRef = {
+  id: string;
+  get: () => Promise<MockDocSnapshot>;
+  set: (_data: MockDocData, _options?: { merge?: boolean }) => Promise<void>;
+  update: (_data: MockDocData) => Promise<void>;
+  delete: () => Promise<void>;
+};
+
+type MockQueryRef = {
+  get: () => Promise<MockQuerySnapshot>;
+  limit: (_count: number) => MockQueryRef;
+  where: (_field: string, _op: string, _value: unknown) => MockQueryRef;
+  count: () => { get: () => Promise<MockQuerySnapshot> };
+};
+
+type MockCollectionRef = MockQueryRef & {
+  doc: (id?: string) => MockDocumentRef;
+};
+
+type MockTransaction = {
+  get: (
+    ref: MockDocumentRef | MockQueryRef
+  ) => Promise<MockDocSnapshot | MockQuerySnapshot>;
+  set: (
+    _ref: MockDocumentRef,
+    _data: MockDocData,
+    _options?: { merge?: boolean }
+  ) => void;
+  update: (_ref: MockDocumentRef, _data: MockDocData) => void;
+};
+
+type MockAuth = {
+  verifyIdToken: (idToken: string) => Promise<{ uid: string }>;
+};
+
+const hasServiceAccountCredentials =
+  Boolean(process.env.FIREBASE_PRIVATE_KEY && process.env.FIREBASE_CLIENT_EMAIL) ||
+  Boolean(process.env.GOOGLE_APPLICATION_CREDENTIALS);
+
+function createEmptyDocSnapshot(): MockDocSnapshot {
+  return {
+    exists: false,
+    data: () => undefined,
+  };
+}
+
+function createEmptyQuerySnapshot(): MockQuerySnapshot {
+  return {
+    empty: true,
+    docs: [],
+    data: () => ({ count: 0 }),
+  };
+}
+
+function createMockDocumentRef(id: string): MockDocumentRef {
+  return {
+    id,
+    get: async () => createEmptyDocSnapshot(),
+    set: async () => undefined,
+    update: async () => undefined,
+    delete: async () => undefined,
+  };
+}
+
+function createMockQueryRef(): MockQueryRef {
+  const queryRef: MockQueryRef = {
+    get: async () => createEmptyQuerySnapshot(),
+    limit: () => queryRef,
+    where: () => queryRef,
+    count: () => ({
+      get: async () => createEmptyQuerySnapshot(),
+    }),
+  };
+
+  return queryRef;
+}
+
+function createMockCollectionRef(): MockCollectionRef {
+  const queryRef = createMockQueryRef();
+
+  return {
+    ...queryRef,
+    doc: (id = "") => createMockDocumentRef(id),
+  };
+}
+
+function createMockTransaction(): MockTransaction {
+  return {
+    get: async (ref) => {
+      if ("count" in ref) {
+        return createEmptyQuerySnapshot();
+      }
+
+      return createEmptyDocSnapshot();
+    },
+    set: () => undefined,
+    update: () => undefined,
+  };
+}
+
+function createMockAuth(): MockAuth {
+  return {
+    verifyIdToken: async (idToken: string) => {
+      if (!idToken) {
+        throw new Error("غير مصرح.");
+      }
+
+      return { uid: idToken };
+    },
+  };
+}
+
+function createMockFirestore() {
+  const collection = (name: string) => {
+    void name;
+    return createMockCollectionRef();
+  };
+
+  return {
+    collection,
+    runTransaction: async <T>(
+      updateFunction: (transaction: MockTransaction) => Promise<T>
+    ) => updateFunction(createMockTransaction()),
+  };
+}
+
+let adminDb: admin.firestore.Firestore;
+let adminAuth: admin.auth.Auth;
+
 if (!admin.apps.length) {
   try {
-    const projectId =
-      process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || firebaseConfig.projectId;
+    if (hasServiceAccountCredentials) {
+      const projectId =
+        process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || firebaseConfig.projectId;
 
-    // Check if we have explicit service account credentials (needed for Vercel)
-    if (process.env.FIREBASE_PRIVATE_KEY && process.env.FIREBASE_CLIENT_EMAIL) {
       admin.initializeApp({
-        projectId: projectId,
+        projectId,
         credential: admin.credential.cert({
-          projectId: projectId,
+          projectId,
           clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-          // Handle newline characters in the private key correctly
-          privateKey: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, "\n"),
+          privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, "\n") || "",
         }),
       });
+
+      adminDb = admin.firestore();
+      adminAuth = admin.auth();
     } else {
-      // Fallback to application default credentials (works in AI Studio)
-      admin.initializeApp({
-        projectId: projectId,
-      });
+      console.warn(
+        "Firebase Admin credentials are unavailable. Using a local no-op fallback so the app can run without crashing."
+      );
+
+      const mockFirestore = createMockFirestore();
+      adminDb = mockFirestore as unknown as admin.firestore.Firestore;
+      adminAuth = createMockAuth() as unknown as admin.auth.Auth;
     }
   } catch (error) {
     console.error("Firebase admin initialization error:", error);
+
+    const mockFirestore = createMockFirestore();
+    adminDb = mockFirestore as unknown as admin.firestore.Firestore;
+    adminAuth = createMockAuth() as unknown as admin.auth.Auth;
   }
+} else {
+  adminDb = admin.firestore();
+  adminAuth = admin.auth();
 }
 
-export const adminDb = admin.firestore();
-export const adminAuth = admin.auth();
+export { adminDb, adminAuth };

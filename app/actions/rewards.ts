@@ -164,8 +164,13 @@ export async function generateRewardCode(
       }
 
       // Ads usually take time. To be very strictly mathematically sure they didn't just paste right away:
-      const startedAtTime = intentData?.startedAt?.toMillis() || Date.now();
-      const timeDiffSeconds = (Date.now() - startedAtTime) / 1000;
+      if (!intentData?.startedAt) {
+        throw new Error("جلسة غير صالحة، يرجى إعادة البدء من الصفحة الرئيسية.");
+      }
+
+      const startedAtTime = intentData.startedAt.toMillis();
+      const serverNow = Date.now();
+      const timeDiffSeconds = (serverNow - startedAtTime) / 1000;
 
       // Assume at least 5 seconds are physically needed to click through the ad
       if (timeDiffSeconds < 5) {

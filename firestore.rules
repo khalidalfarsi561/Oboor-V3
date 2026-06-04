@@ -32,7 +32,6 @@ service cloud.firestore {
 
     match /linkClaims/{claimId} {
       allow read: if isSignedIn() && (claimId.matches(request.auth.uid + '_.*') || isAdmin());
-      allow delete: if isSignedIn() && claimId.matches(request.auth.uid + '_.*');
     }
 
     match /rewardCodes/{codeId} {

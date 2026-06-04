@@ -10,7 +10,7 @@ export function ShortlinkCountdown() {
   useEffect(() => {
     // Optionally check local storage for bypass as per instruction "local storage bypass"
     const skip = localStorage.getItem("skip_shortlink_timer");
-    if (skip === "true") {
+    if (process.env.NODE_ENV === "development" && skip === "true") {
       router.push("/secret?linkId=daily_link_1");
       return;
     }
