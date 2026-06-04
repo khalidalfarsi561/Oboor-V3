@@ -35,7 +35,7 @@ service cloud.firestore {
     }
 
     match /rewardCodes/{codeId} {
-      allow read: if isSignedIn(); 
+      allow read: if isAdmin(); // تم التغيير هنا لحظر القراءة من المستخدم العادي
       allow write: if isAdmin();
     }
 

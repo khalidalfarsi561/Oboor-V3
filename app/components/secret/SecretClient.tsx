@@ -41,7 +41,7 @@ export function SecretClient({ linkId, token }: { linkId: string; token: string 
     }
 
     // Basic security token to prevent users from bypassing the shortlink by sharing the final target URL
-    const EXPECTED_TOKEN = "jambo-secure-77X"; // You can change this later
+    const EXPECTED_TOKEN = process.env.NEXT_PUBLIC_JAMBO_TOKEN || "jambo-secure-77X";
     if (token !== EXPECTED_TOKEN) {
       setTimeout(() => {
         setStatus("denied");

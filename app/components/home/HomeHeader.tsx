@@ -96,11 +96,8 @@ export function HomeHeader({ user, balance, signIn, signOut, design }: HomeHeade
             {/* Mobile Login Button (Exactly like image) */}
             <button
               onClick={signIn}
-              className="rounded-[10px] bg-[#2563EB] px-6 py-2 text-[15px] font-bold text-white shadow-[0_4px_14px_0_rgba(37,99,235,0.39)] transition-all hover:bg-blue-700 active:scale-95 md:hidden"
-              style={{
-                fontFamily: "'Childos Arabic', sans-serif",
-                ...getStyle("login_btn_mobile"),
-              }}
+              className="font-childos rounded-[10px] bg-[#2563EB] px-6 py-2 text-[15px] font-bold text-white shadow-[0_4px_14px_0_rgba(37,99,235,0.39)] transition-all hover:bg-blue-700 active:scale-95 md:hidden"
+              style={getStyle("login_btn_mobile")}
             >
               تسجيل الدخول
             </button>

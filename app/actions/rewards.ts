@@ -31,7 +31,15 @@ async function getClientFraudData() {
   let deviceId = cookieStore.get("device_fingerprint")?.value;
 
   if (!deviceId) {
-    deviceId = crypto.randomUUID();
+    // بدلاً من عشوائية كاملة، ندمج خصائص ثابتة للمتصفح والشبكة لتصعيب الخداع عند مسح الكوكيز
+    const textBuffer = new TextEncoder().encode(`${ip}-${userAgent}`);
+    // توليد معرف شبه ثابت للمتصفح الحالي من نفس الشبكة
+    deviceId = crypto.subtle
+      ? Buffer.from(await crypto.subtle.digest("SHA-1", textBuffer))
+          .toString("hex")
+          .substring(0, 16)
+      : `dev-${ip.replace(/[^0-9]/g, "")}`;
+
     cookieStore.set("device_fingerprint", deviceId, {
       maxAge: 60 * 60 * 24 * 365,
       httpOnly: true,
