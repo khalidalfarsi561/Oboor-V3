@@ -1,3 +1,27 @@
+@font-face {
+  font-family: "InkBrushArabic";
+  src: url("/fonts/InkBrushArabic_DEMO-Textured.otf") format("opentype");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+.font-inkbrush {
+  font-family: "InkBrushArabic", sans-serif;
+}
+
+@font-face {
+  font-family: "AaaGoldenLotus";
+  src: url("/fonts/aaagoldenlotus_stg1_ver1_regular.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+.font-lotus {
+  font-family: "AaaGoldenLotus", sans-serif;
+}
+
 @import "tailwindcss";
 @import "tw-animate-css";
 
