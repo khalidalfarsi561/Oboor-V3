@@ -22,7 +22,20 @@ export function HomeClient({
   const { user, loading, signIn, signOut } = useAuth();
   const { balance, isBalanceLoading } = useUserBalance(user?.uid);
 
-  const [code, setCode] = useState("");
+  const getAutoClaimCode = (): string => {
+    if (typeof window !== "undefined") {
+      const urlParams = new URLSearchParams(window.location.search);
+      const autoCode = urlParams.get("autoClaim");
+      if (autoCode && autoCode.length === 8) {
+        // تنظيف الرابط بعد أخذ الكود ليبقى المظهر نظيفاً
+        window.history.replaceState({}, document.title, window.location.pathname);
+        return autoCode.toUpperCase();
+      }
+    }
+    return "";
+  };
+
+  const [code, setCode] = useState(getAutoClaimCode);
   const [errorMsg, setErrorMsg] = useState("");
   const [claiming, setClaiming] = useState(false);
 

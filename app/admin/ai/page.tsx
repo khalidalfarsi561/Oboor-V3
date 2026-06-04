@@ -29,19 +29,12 @@ export default function AiAssistant() {
 
     startTransition(async () => {
       try {
-        const context =
-          "User dashboard states: System is running smoothly. Drag and Drop builder is enabled.";
-        const fullPrompt = `You are the master site-managing AI assistant.
-Website Context: Next.js Vercel app matching Firestore rules. The Admin UI has visual drag and drop, and anti-fraud systems.
-Current Status: ${context}
-User Admin Query: ${userPrompt}`;
-
         if (!user) {
           throw new Error("غير مصرح.");
         }
 
         const idToken = await user.getIdToken();
-        const res = await askAdminAI(idToken, fullPrompt, []);
+        const res = await askAdminAI(idToken, userPrompt, []);
 
         if (res.success && res.text) {
           setMessages((prev) =>

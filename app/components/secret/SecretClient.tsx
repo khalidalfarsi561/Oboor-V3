@@ -98,11 +98,11 @@ export function SecretClient({ linkId, token }: { linkId: string; token: string 
   const handleCopy = () => {
     navigator.clipboard.writeText(generatedCode);
     setCopied(true);
-    toast.success("تم نسخ الكود بنجاح!");
+    toast.success("تم نسخ الكود بنجاح! سيتم تطبيق المكافأة تلقائياً.");
 
-    // Kick user to main page
+    // نقوم بتمرير الكود في الرابط حتى تلتقطه الصفحة الرئيسية فوراً
     setTimeout(() => {
-      router.push("/");
+      router.push(`/?autoClaim=${generatedCode}`);
     }, 1500);
   };
 

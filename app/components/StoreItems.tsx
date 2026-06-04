@@ -6,6 +6,7 @@ import { CheckCircle2, Copy, X } from "lucide-react";
 import { useAuth } from "./AuthProvider";
 import { toast } from "sonner";
 import { ITEMS, StoreItem } from "../lib/data";
+import { Package } from "lucide-react";
 import {
   purchaseItem,
   getStockNotificationMap,
