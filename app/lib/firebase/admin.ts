@@ -30,6 +30,7 @@ type MockQueryRef = {
   get: () => Promise<MockQuerySnapshot>;
   limit: (_count: number) => MockQueryRef;
   where: (_field: string, _op: string, _value: unknown) => MockQueryRef;
+  orderBy: (_field: string, _direction?: string) => MockQueryRef;
   count: () => { get: () => Promise<MockQuerySnapshot> };
 };
 
@@ -87,6 +88,7 @@ function createMockQueryRef(): MockQueryRef {
     get: async () => createEmptyQuerySnapshot(),
     limit: () => queryRef,
     where: () => queryRef,
+    orderBy: () => queryRef,
     count: () => ({
       get: async () => createEmptyQuerySnapshot(),
     }),
