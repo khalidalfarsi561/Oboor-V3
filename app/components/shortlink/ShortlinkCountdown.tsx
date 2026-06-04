@@ -15,16 +15,20 @@ export function ShortlinkCountdown() {
       return;
     }
 
+    const targetTime = Date.now() + 10 * 1000; // وقت النهاية الفعلي بعد 10 ثوانٍ
+
     const interval = setInterval(() => {
-      setCountdown((prev) => {
-        if (prev <= 1) {
-          clearInterval(interval);
-          router.push("/secret?linkId=daily_link_1");
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
+      const remaining = Math.ceil((targetTime - Date.now()) / 1000);
+
+      if (remaining <= 0) {
+        clearInterval(interval);
+        setCountdown(0);
+        router.push("/secret?linkId=daily_link_1");
+      } else {
+        setCountdown(remaining);
+      }
+    }, 500); // الفحص كل نصف ثانية لضمان الدقة العالية
+
     return () => clearInterval(interval);
   }, [router]);
 

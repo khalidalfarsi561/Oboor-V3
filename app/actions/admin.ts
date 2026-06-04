@@ -82,15 +82,19 @@ Example: {"backgroundColor": "#ff0000", "borderRadius": "12px"}`;
     const response = await ai.models.generateContent({
       model: "gemini-1.5-flash",
       contents: aiPrompt,
+      config: {
+        // إجبار النموذج على إرجاع كائن JSON متوافق تماماً
+        responseMimeType: "application/json",
+      },
     });
 
     const responseText = response.text;
     if (!responseText) throw new Error("AI returned empty response");
-    const rawJson = responseText.replace(/```json|```/g, "").trim();
 
     let patch: Record<string, any>;
     try {
-      patch = JSON.parse(rawJson);
+      // بما أننا أجبرناه على JSON، سنقوم بعمل Parse مباشرة دون خوف من نصوص الـ Markdown
+      patch = JSON.parse(responseText.trim());
     } catch (e) {
       throw new Error("AI returned invalid JSON: " + responseText);
     }

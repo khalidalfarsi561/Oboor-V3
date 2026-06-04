@@ -1,5 +1,4 @@
 import * as admin from "firebase-admin";
-import firebaseConfig from "../../../firebase-applet-config.json";
 
 type MockDocData = Record<string, unknown>;
 
@@ -152,8 +151,7 @@ let adminAuth: admin.auth.Auth;
 if (!admin.apps.length) {
   try {
     if (hasServiceAccountCredentials) {
-      const projectId =
-        process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || firebaseConfig.projectId;
+      const projectId = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID;
 
       admin.initializeApp({
         projectId,
