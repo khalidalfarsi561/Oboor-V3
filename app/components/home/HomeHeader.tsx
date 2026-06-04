@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { Wallet, LogIn, LogOut, Gift } from "lucide-react";
@@ -18,6 +18,7 @@ interface HomeHeaderProps {
 }
 
 export function HomeHeader({ user, balance, signIn, signOut, design }: HomeHeaderProps) {
+  const [showMobileMenu, setShowMobileMenu] = useState(false);
   const getStyle = (id: string) => mapDesignPatchToStyle(design[id] || {});
 
   // Placeholder for the logo URL - user can replace this
@@ -34,13 +35,71 @@ export function HomeHeader({ user, balance, signIn, signOut, design }: HomeHeade
           <div className="flex items-center gap-2">
             {/* Minimal Mobile view for logged in user */}
             <div className="relative -top-1 flex items-center gap-2 md:hidden">
-              <UserAvatar src={user.photoURL} alt={user.displayName} size={32} />
-              <button
-                onClick={signOut}
-                className="rounded-lg bg-red-500/10 px-3 py-1 text-xs font-bold text-red-600"
+              {/* كرت الرصيد في الجوال */}
+              <div
+                className="flex items-center justify-center gap-1.5 rounded-full border border-slate-200 bg-white px-4 py-2.5 shadow-sm"
+                dir="ltr"
+                style={getStyle("wallet")}
               >
-                خروج
-              </button>
+                <AnimatePresence mode="popLayout">
+                  <motion.span
+                    key={balance}
+                    initial={{ opacity: 0, y: -5 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 5 }}
+                    className="inline-block text-sm font-bold text-slate-800"
+                  >
+                    ${balance !== null ? balance : "..."}
+                  </motion.span>
+                </AnimatePresence>
+                <Wallet
+                  className="h-4 w-4 text-blue-600"
+                  style={getStyle("wallet_icon")}
+                />
+              </div>
+
+              {/* حاوية الصورة الشخصية والقائمة المنبثقة */}
+              <div className="relative">
+                {/* زر الصورة الشخصية */}
+                <button
+                  onClick={() => setShowMobileMenu(!showMobileMenu)}
+                  className="flex items-center justify-center transition-transform focus:outline-none active:scale-95"
+                  title="قائمة المستخدم"
+                >
+                  <UserAvatar src={user.photoURL} alt={user.displayName} size={40} />
+                </button>
+
+                {/* القائمة المنبثقة عند النقر على الصورة */}
+                <AnimatePresence>
+                  {showMobileMenu && (
+                    <>
+                      {/* خلفية شفافة لإغلاق القائمة عند النقر في أي مكان خارجها */}
+                      <div
+                        className="fixed inset-0 z-40"
+                        onClick={() => setShowMobileMenu(false)}
+                      />
+
+                      {/* كرت زر الخروج المنبثق */}
+                      <motion.div
+                        initial={{ opacity: 0, scale: 0.95, y: -10 }}
+                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                        exit={{ opacity: 0, scale: 0.95, y: -10 }}
+                        className="absolute left-0 z-50 mt-2 w-28 rounded-xl border border-slate-100 bg-white p-1 shadow-xl"
+                      >
+                        <button
+                          onClick={() => {
+                            signOut();
+                            setShowMobileMenu(false);
+                          }}
+                          className="flex w-full items-center justify-center gap-1 rounded-lg bg-red-50 px-3 py-2 text-center text-xs font-bold text-red-600 transition-colors hover:bg-red-100"
+                        >
+                          تسجيل الخروج
+                        </button>
+                      </motion.div>
+                    </>
+                  )}
+                </AnimatePresence>
+              </div>
             </div>
 
             {/* Desktop view for logged in user */}
