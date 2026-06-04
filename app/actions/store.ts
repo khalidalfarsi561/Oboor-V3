@@ -26,8 +26,8 @@ export async function getStoreStock() {
 
 const STORE_ITEMS: Record<number, { name: string; price: number }> = {
   1: {
-    name: "CapCut Pro Account",
-    price: 1,
+    name: "كاب كات برو لمدة 7 أيام",
+    price: 2,
   },
 };
 

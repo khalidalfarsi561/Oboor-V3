@@ -172,8 +172,8 @@ export async function generateRewardCode(
       const serverNow = Date.now();
       const timeDiffSeconds = (serverNow - startedAtTime) / 1000;
 
-      // Assume at least 5 seconds are physically needed to click through the ad
-      if (timeDiffSeconds < 5) {
+      // رفع المدة الزمنية إلى 15 ثانية لمنع البوتات والتخطي الوهمي السريع
+      if (timeDiffSeconds < 15) {
         throw new Error(
           "النظام رصد محاولة تجاوز للرابط المختصر! يجب عليك الانتظار والمرور بصفحات الإعلان بشكل طبيعي."
         );
