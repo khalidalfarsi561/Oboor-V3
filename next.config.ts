@@ -27,6 +27,11 @@ const nextConfig: NextConfig = {
     ],
   },
   output: "standalone",
+  experimental: {
+    serverActions: {
+      allowedOrigins: ["l7jv0rl7-3000.uks1.devtunnels.ms", "localhost:3000"],
+    },
+  },
   webpack: (config, { dev }) => {
     // HMR is disabled in AI Studio via DISABLE_HMR env var.
     // Do not modify - file watching is disabled to prevent flickering during agent edits.
