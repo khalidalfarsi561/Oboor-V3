@@ -49,12 +49,62 @@ async function getClientFraudData() {
 }
 
 async function detectVPN(): Promise<boolean> {
-  const headersList = await headers();
+  try {
+    const headersList = await headers();
 
-  // قراءة فحص البروكسي والـ Data Centers مباشرة من شبكة Vercel Edge
-  const isProxy = headersList.get("x-vercel-proxied") === "true";
+    // 1. الفحص الأولي السريع عبر Vercel
+    const isProxy = headersList.get("x-vercel-proxied") === "true";
+    if (isProxy) return true;
 
-  return isProxy;
+    // 2. استخراج عنوان الـ IP الحقيقي للمستخدم القادم عبر شبكة Vercel
+    const xForwardedFor = headersList.get("x-forwarded-for");
+    let ip = "unknown";
+    if (xForwardedFor) {
+      ip = xForwardedFor.split(",")[0].trim();
+    } else {
+      ip = headersList.get("x-real-ip") || "unknown";
+    }
+
+    // إذا كنا على الجهاز المحلي أثناء التطوير، تخطى الفحص لكي لا يتم حظرك
+    if (ip === "unknown" || ip === "::1" || ip === "127.0.0.1") {
+      return false;
+    }
+
+    // 3. الفحص الصارم عبر API خارجي ذكي وسريع جداً
+    // نضع مهلة زمنية صارمة (1.2 ثانية) لضمان عدم تأثر سرعة الموقع نهائياً
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 1200);
+
+    const response = await fetch(
+      `http://ip-api.com/json/${ip}?fields=status,proxy,hosting,hostingProvider`,
+      {
+        signal: controller.signal,
+        next: { revalidate: 3600 }, // تفعيل الكاش لـ Next.js لمنع تكرار الطلبات لنفس الـ IP وتسريع الاستجابة
+      }
+    );
+
+    clearTimeout(timeoutId);
+
+    if (!response.ok) return false;
+
+    const data = await response.json();
+
+    if (data && data.status === "success") {
+      // كشف شبكات الـ VPN، البروكسي، أو محاولات السكربتات من خواف الاستضافة
+      if (data.proxy === true || data.hosting === true) {
+        console.warn(
+          `[SECURITY] VPN/Proxy detected for IP: ${ip} via ${data.hostingProvider || "Unknown"}`
+        );
+        return true;
+      }
+    }
+
+    return false;
+  } catch (error) {
+    console.error("خطأ أثناء فحص الـ VPN الخارجي:", error);
+    // في حال حدوث أي مشكلة في الـ API الخارجي، نمرر المستخدم فوراً لضمان استمرارية عمل الموقع وسرعته
+    return false;
+  }
 }
 
 async function getUidFromToken(idToken: string): Promise<string> {
