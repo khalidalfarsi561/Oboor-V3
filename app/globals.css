@@ -1,25 +1,12 @@
-@font-face {
-  font-family: "InkBrushArabic";
-  src: url("/fonts/InkBrushArabic_DEMO-Textured.otf") format("opentype");
-  font-weight: normal;
-  font-style: normal;
-  font-display: swap;
-}
-
+/* 🟢 ربط كلاسات العناوين القديمة بخط Cairo الجديد المجلوب من جوجل */
 .font-inkbrush {
-  font-family: "InkBrushArabic", sans-serif;
-}
-
-@font-face {
-  font-family: "AaaGoldenLotus";
-  src: url("/fonts/aaagoldenlotus_stg1_ver1_regular.ttf") format("truetype");
-  font-weight: normal;
-  font-style: normal;
-  font-display: swap;
+  font-family: var(--font-cairo), sans-serif;
+  font-weight: 900;
 }
 
 .font-lotus {
-  font-family: "AaaGoldenLotus", sans-serif;
+  font-family: var(--font-cairo), sans-serif;
+  font-weight: 700;
 }
 
 @import "tailwindcss";

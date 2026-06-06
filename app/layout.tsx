@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Tajawal, Inter, JetBrains_Mono } from "next/font/google";
+import { Tajawal, Inter, JetBrains_Mono, Cairo } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "./components/AuthProvider";
 import { Toaster } from "sonner";
@@ -7,6 +7,13 @@ import { Toaster } from "sonner";
 const tajawal = Tajawal({
   subsets: ["arabic"],
   weight: ["200", "300", "400", "500", "700", "800", "900"],
+  display: "swap",
+});
+
+const cairo = Cairo({
+  subsets: ["arabic"],
+  weight: ["700", "900"],
+  variable: "--font-cairo",
   display: "swap",
 });
 
@@ -39,7 +46,11 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="ar" dir="rtl" className={`${inter.variable} ${jetbrainsMono.variable}`}>
+    <html
+      lang="ar"
+      dir="rtl"
+      className={`${inter.variable} ${jetbrainsMono.variable} ${cairo.variable}`}
+    >
       <body
         className={`${tajawal.className} flex min-h-screen flex-col scroll-smooth bg-slate-50 text-slate-900 antialiased`}
         suppressHydrationWarning
