@@ -25,7 +25,7 @@ export const HomeHero = ({
 
     <div className="relative z-10 flex w-full flex-col items-center justify-between gap-8 text-center md:flex-row md:text-right">
       <div>
-        <h2 className="font-inkbrush mb-3 text-2xl font-bold tracking-tight text-slate-900 md:text-3xl">
+        <h2 className="mb-3 text-2xl font-bold tracking-tight text-slate-900 md:text-3xl">
           {UI_MESSAGES.home.heroTitle}
         </h2>
         <p className="mb-6 text-base leading-relaxed text-slate-500 sm:mb-8 md:text-lg">

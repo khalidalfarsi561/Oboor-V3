@@ -4,7 +4,7 @@ export const UI_MESSAGES = {
     heroDescStart: "تخطَ الرابط المختصر لاختبار سرعتك واحصل على كود بقيمة ",
     heroDescEnd: " مجاناً كل 24 ساعة.",
     heroButton: "احصل على الكود الآن",
-    claimTitle: "هل لديك كود سري !",
+    claimTitle: "هل لديك كود سري ؟",
     claimDesc:
       "أدخل الكود المكون من 8 رموز في الأسفل لاسترداد قيمة الكود وإضافته إلى رصيدك",
     claimInputPlaceholder: "أدخل الكود",

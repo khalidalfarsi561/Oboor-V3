@@ -35,10 +35,10 @@ export const HomeClaim = ({
       className="mb-12 rounded-[24px] border border-slate-200 bg-slate-50 p-6 sm:rounded-[32px] sm:p-8 md:mb-20 md:p-10"
     >
       <div className="mx-auto max-w-xl text-center md:mx-0 md:text-right">
-        <h2 className="font-inkbrush mb-2 text-xl font-bold text-slate-900 sm:mb-3 sm:text-2xl">
+        <h2 className="mb-2 text-xl font-bold text-slate-900 sm:mb-3 sm:text-2xl">
           {UI_MESSAGES.home.claimTitle}
         </h2>
-        <p className="font-lotus text-slate-550 mb-6 text-lg md:text-base">
+        <p className="mb-6 text-sm text-slate-500 md:text-base">
           {UI_MESSAGES.home.claimDesc}
         </p>
 
