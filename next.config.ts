@@ -29,7 +29,11 @@ const nextConfig: NextConfig = {
   output: "standalone",
   experimental: {
     serverActions: {
-      allowedOrigins: ["l7jv0rl7-3000.uks1.devtunnels.ms", "localhost:3000"],
+      allowedOrigins: [
+        "l7jv0rl7-3000.uks1.devtunnels.ms",
+        "localhost:3000",
+        "oboor-store.com",
+      ],
     },
   },
   webpack: (config, { dev }) => {

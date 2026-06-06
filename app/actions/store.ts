@@ -158,22 +158,40 @@ export async function getUserPurchases(idToken: string) {
       .orderBy("createdAt", "desc")
       .get();
 
-    const purchasePromises = snap.docs.map(async (purchaseDoc) => {
-      const pData = purchaseDoc.data();
-      const accountDoc = await adminDb
-        .collection("capcutAccounts")
-        .doc(pData.accountId)
-        .get();
+    if (snap.empty) {
+      return { success: true, purchases: [] };
+    }
+
+    // 1. استخراج جميع بيانات المشتريات ومجال معرفات الحسابات
+    const purchasesData = snap.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    }));
+
+    const accountIds = Array.from(new Set(purchasesData.map((p: any) => p.accountId)));
+
+    // 2. جلب كل الحسابات بطلب واحد مجمع لتقليل وقت الانتظار
+    const accountsSnap = await adminDb
+      .collection("capcutAccounts")
+      .where("__name__", "in", accountIds.slice(0, 30))
+      .get();
+
+    // 3. تحويل الحسابات إلى خريطة (Map) ليسهل قراءتها فوراً
+    const accountsMap = new Map(accountsSnap.docs.map((doc) => [doc.id, doc.data()]));
+
+    // 4. دمج البيانات ديناميكياً بدون استعلامات متكررة
+    const purchases = purchasesData.map((p: any) => {
+      const account: any = accountsMap.get(p.accountId);
       return {
-        id: purchaseDoc.id,
-        itemName: pData.itemName,
-        createdAt: pData.createdAt?.toMillis() || Date.now(),
-        email: accountDoc.exists ? accountDoc.data()?.email : "غير متوفر",
-        password: accountDoc.exists ? accountDoc.data()?.password : "غير متوفر",
+        id: p.id,
+        itemName: p.itemName,
+        createdAt: p.createdAt?.toMillis() || Date.now(),
+        email: account ? account.email : "غير متوفر",
+        password: account ? account.password : "غير متوفر",
       };
     });
 
-    return { success: true, purchases: await Promise.all(purchasePromises) };
+    return { success: true, purchases };
   } catch (err: any) {
     console.error("Error fetching purchases:", err);
     return { success: false, error: err.message };

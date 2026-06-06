@@ -4,7 +4,7 @@ import { getStoreStock } from "./actions/store";
 import { HomeClient } from "./components/home/HomeClient";
 import { getPublicSiteSettings } from "./lib/site-settings";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 // عمل كاش للإعدادات باستخدام التاج المخصص لها
 const getCachedSiteSettings = unstable_cache(

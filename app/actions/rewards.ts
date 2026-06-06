@@ -48,30 +48,13 @@ async function getClientFraudData() {
   return { ip, deviceId, userAgent };
 }
 
-async function detectVPN(ip: string): Promise<boolean> {
-  if (!ip || ip === "unknown" || ip === "127.0.0.1" || ip.startsWith("192.168."))
-    return false;
+async function detectVPN(): Promise<boolean> {
+  const headersList = await headers();
 
-  const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 3000);
+  // قراءة فحص البروكسي والـ Data Centers مباشرة من شبكة Vercel Edge
+  const isProxy = headersList.get("x-vercel-proxied") === "true";
 
-  try {
-    const res = await fetch(`https://ip-api.com/json/${ip}?fields=proxy,hosting,status`, {
-      signal: controller.signal,
-      next: { revalidate: 3600 },
-    });
-
-    if (!res.ok) return false;
-    const data = await res.json();
-
-    if (data.status !== "success") return false;
-    return !!(data.proxy || data.hosting);
-  } catch (err) {
-    console.warn(`VPN detection failed for IP ${ip}:`, err);
-    return false;
-  } finally {
-    clearTimeout(timeoutId);
-  }
+  return isProxy;
 }
 
 async function getUidFromToken(idToken: string): Promise<string> {
@@ -92,7 +75,7 @@ export async function initiateClaimIntent(
   try {
     const { ip, deviceId, userAgent } = await getClientFraudData();
 
-    if (await detectVPN(ip)) {
+    if (await detectVPN()) {
       return { success: false, error: "VPN_DETECTED" };
     }
 
