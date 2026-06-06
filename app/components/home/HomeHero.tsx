@@ -46,7 +46,7 @@ export const HomeHero = ({
               const res = await initiateClaimIntent(idToken, "daily_link_1");
               if (res.success) {
                 toast.success("تم التوجيه نحو الرابط!", { id: "intent-toast" });
-                window.location.href = "https://short-jambo.ink/Gate";
+                window.location.href = "https://short-jambo.ink/Gate1";
               } else if (res.error === "VPN_DETECTED") {
                 toast.error(
                   "عذراً، محاولة الوصول مرفوضة لتفعيلك VPN أو Proxy. يرجى إيقافه والمحاولة مرة أخرى لحماية المعلنين.",
