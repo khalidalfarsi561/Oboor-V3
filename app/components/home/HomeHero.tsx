@@ -3,6 +3,7 @@
 import React, { CSSProperties } from "react";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
+import { UI_MESSAGES } from "../../lib/messages";
 
 export const HomeHero = ({
   user,
@@ -25,17 +26,18 @@ export const HomeHero = ({
     <div className="relative z-10 flex w-full flex-col items-center justify-between gap-8 text-center md:flex-row md:text-right">
       <div>
         <h2 className="font-inkbrush mb-3 text-2xl font-bold tracking-tight text-slate-900 md:text-3xl">
-          اربح رصيداً مجانياً يومياً
+          {UI_MESSAGES.home.heroTitle}
         </h2>
         <p className="mb-6 text-base leading-relaxed text-slate-500 sm:mb-8 md:text-lg">
-          تخطَ الرابط المختصر لاختبار سرعتك واحصل على كود بقيمة{" "}
-          <strong className="text-blue-600">1$</strong> مجاناً كل 24 ساعة.
+          {UI_MESSAGES.home.heroDescStart}
+          <strong className="text-blue-600">1$</strong>
+          {UI_MESSAGES.home.heroDescEnd}
         </p>
 
         <button
           onClick={async () => {
             if (!user) {
-              toast.error("يجب تسجيل الدخول أولاً قبل تخطي الرابط.");
+              toast.error(UI_MESSAGES.errors.loginRequired);
               signIn();
               return;
             }
@@ -48,20 +50,20 @@ export const HomeHero = ({
                 toast.success("تم التوجيه نحو الرابط!", { id: "intent-toast" });
                 window.location.href = "https://short-jambo.ink/Gate1";
               } else if (res.error === "VPN_DETECTED") {
-                toast.error(
-                  "عذراً، محاولة الوصول مرفوضة لتفعيلك VPN أو Proxy. يرجى إيقافه والمحاولة مرة أخرى لحماية المعلنين.",
-                  { id: "intent-toast", duration: 8000 }
-                );
+                toast.error(UI_MESSAGES.errors.vpnMessage, {
+                  id: "intent-toast",
+                  duration: 8000,
+                });
               } else {
                 toast.error(res.error || "حدث خطأ في النظام.", { id: "intent-toast" });
               }
             } catch (e) {
-              toast.error("تأكد من اتصالك بالإنترنت", { id: "intent-toast" });
+              toast.error(UI_MESSAGES.errors.internetError, { id: "intent-toast" });
             }
           }}
           className="inline-flex w-full cursor-pointer items-center justify-center gap-2 rounded-2xl bg-blue-600 px-8 py-3.5 text-base font-semibold text-white shadow-lg shadow-blue-600/20 transition-all hover:-translate-y-0.5 hover:bg-blue-700 focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 focus-visible:outline-none sm:w-auto sm:py-4 sm:text-lg"
         >
-          احصل على الكود الآن
+          {UI_MESSAGES.home.heroButton}
         </button>
       </div>
     </div>

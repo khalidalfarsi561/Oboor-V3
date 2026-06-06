@@ -2,6 +2,7 @@
 
 import { adminDb, adminAuth } from "../lib/firebase/admin";
 import { FieldValue } from "firebase-admin/firestore";
+import { ITEMS_MAP } from "../lib/data";
 
 async function getUidFromToken(idToken: string): Promise<string> {
   if (!idToken) throw new Error("غير مصرح.");
@@ -24,17 +25,11 @@ export async function getStoreStock() {
   }
 }
 
-const STORE_ITEMS: Record<number, { name: string; price: number }> = {
-  1: {
-    name: "كاب كات برو لمدة 7 أيام",
-    price: 2,
-  },
-};
-
 export async function purchaseItem(idToken: string, itemId: number) {
   const userId = await getUidFromToken(idToken);
 
-  const item = STORE_ITEMS[itemId];
+  // ✅ التعديل: القراءة الآن تتم من الملف الموحد مباشرة
+  const item = ITEMS_MAP[itemId];
 
   if (!item) {
     throw new Error("منتج غير مدعوم حالياً.");
