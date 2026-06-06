@@ -4,6 +4,7 @@ import { adminDb, adminAuth } from "../lib/firebase/admin";
 import { assertRateLimit } from "../lib/rate-limit";
 import { FieldValue } from "firebase-admin/firestore";
 import { headers, cookies } from "next/headers";
+import { UI_MESSAGES } from "../lib/messages";
 
 function generateRandomCode(): string {
   const array = new Uint8Array(6);
@@ -188,21 +189,17 @@ export async function generateRewardCode(
       const intentSnap = await transaction.get(intentRef);
 
       if (!intentSnap.exists) {
-        throw new Error(
-          "عملية غير صالحة. يجب عليك النقر على زر التخطي من الصفحة الرئيسية أولاً."
-        );
+        throw new Error(UI_MESSAGES.errors.backendInvalidIntent);
       }
 
       const intentData = intentSnap.data();
       if (intentData?.status !== "pending") {
-        throw new Error(
-          "عذراً، الرابط غير صالح حالياً أو تم استخدامه للتخطي مسبقاً. يرجى البدء من الزر في الصفحة الرئيسية."
-        );
+        throw new Error(UI_MESSAGES.errors.backendLinkExpired);
       }
 
       // Ads usually take time. To be very strictly mathematically sure they didn't just paste right away:
       if (!intentData?.startedAt) {
-        throw new Error("جلسة غير صالحة، يرجى إعادة البدء من الصفحة الرئيسية.");
+        throw new Error(UI_MESSAGES.errors.backendInvalidSession);
       }
 
       const startedAtTime = intentData.startedAt.toMillis();
@@ -211,9 +208,7 @@ export async function generateRewardCode(
 
       // رفع المدة الزمنية إلى 15 ثانية لمنع البوتات والتخطي الوهمي السريع
       if (timeDiffSeconds < 15) {
-        throw new Error(
-          "النظام رصد محاولة تجاوز للرابط المختصر! يجب عليك الانتظار والمرور بصفحات الإعلان بشكل طبيعي."
-        );
+        throw new Error(UI_MESSAGES.errors.backendBypassBlock);
       }
 
       const claimId = `${userId}_${linkId}`;
@@ -242,9 +237,7 @@ export async function generateRewardCode(
             const timeDiff = Date.now() - lastGen.toMillis();
             if (timeDiff < 86400000) {
               const hoursLeft = Math.ceil((86400000 - timeDiff) / (1000 * 60 * 60));
-              throw new Error(
-                `لقد تم استخدام هذا الرابط من هذا الحساب أو الجهاز أو الشبكة. يرجى الانتظار ${hoursLeft} ساعة.`
-              );
+              throw new Error(`${UI_MESSAGES.errors.backendLinkUsed}${hoursLeft} ساعة.`);
             }
           }
         }

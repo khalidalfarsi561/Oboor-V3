@@ -16,6 +16,7 @@ import { useRouter } from "next/navigation";
 import { generateRewardCode } from "../../actions/rewards";
 import { deleteDoc, doc } from "firebase/firestore";
 import { db } from "../../lib/firebase/client";
+import { UI_MESSAGES } from "../../lib/messages";
 
 export function SecretClient({ linkId, token }: { linkId: string; token: string }) {
   const router = useRouter();
@@ -65,21 +66,13 @@ export function SecretClient({ linkId, token }: { linkId: string; token: string 
       if (!result.success || result.error) {
         setStatus("denied");
         if (result.error?.includes("النقر على زر التخطي")) {
-          setErrorMessage(
-            "لا يمكنك الوصول المباشر لهذه الصفحة! يجب عليك البدء بالضغط على الزر من الصفحة الرئيسية لتخطي الرابط بشكل شرعي."
-          );
+          setErrorMessage(UI_MESSAGES.secret.errDirectAccess);
         } else if (result.error?.includes("الرابط غير صالح حالياً")) {
-          setErrorMessage(
-            "انتهت صلاحية الجلسة أو حاولت تكرار التخطي الوهمي. ارجع للصفحة الرئيسية وابدأ من جديد."
-          );
+          setErrorMessage(UI_MESSAGES.secret.errSessionExpired);
         } else if (result.error?.includes("محاولة تجاوز")) {
-          setErrorMessage(
-            "النظام رصد محاولة تجاوز أو تخطي غير منطقي للإعلانات بالرجوع السريع جداً! العب بإنصاف."
-          );
+          setErrorMessage(UI_MESSAGES.secret.errBypassDetected);
         } else if (result.error === "VPN_DETECTED") {
-          setErrorMessage(
-            "عذراً، محاولة الوصول مرفوضة لتفعيلك VPN أو Proxy. يرجى إيقافه والمحاولة مرة أخرى لحماية المعلنين."
-          );
+          setErrorMessage(UI_MESSAGES.secret.vpnMessage);
         } else {
           setErrorMessage(result.error || "حدث خطأ أثناء إصدار الكود.");
         }
@@ -110,7 +103,9 @@ export function SecretClient({ linkId, token }: { linkId: string; token: string 
     return (
       <div className="flex flex-col items-center justify-center p-8">
         <Loader2 className="mb-6 h-10 w-10 animate-spin text-blue-600" />
-        <p className="font-medium text-slate-500">التحقق من الاتصال الآمن...</p>
+        <p className="font-medium text-slate-500">
+          {UI_MESSAGES.secret.checkingConnection}
+        </p>
       </div>
     );
   }
@@ -129,17 +124,18 @@ export function SecretClient({ linkId, token }: { linkId: string; token: string 
             <div className="mx-auto mb-8 flex h-20 w-20 items-center justify-center rounded-2xl bg-blue-50">
               <ShieldAlert className="h-10 w-10 text-blue-600" />
             </div>
-            <h1 className="mb-3 text-2xl font-bold text-slate-900">تسجيل الدخول مطلوب</h1>
+            <h1 className="mb-3 text-2xl font-bold text-slate-900">
+              {UI_MESSAGES.secret.loginRequiredTitle}
+            </h1>
             <p className="mb-10 text-lg text-slate-500">
-              لإكمال العملية وإنشاء الكود السري يجب أن تقوم بتسجيل الدخول لحسابك لتجنب
-              الاحتيال.
+              {UI_MESSAGES.secret.loginRequiredDesc}
             </p>
             <button
               onClick={signIn}
               className="flex w-full items-center justify-center gap-3 rounded-2xl bg-blue-600 px-8 py-4 font-semibold text-white shadow-lg transition-all hover:bg-blue-700"
             >
               <LogIn className="ml-2 h-5 w-5" />
-              سجل الدخول فوراً
+              {UI_MESSAGES.secret.loginButton}
             </button>
           </motion.div>
         ) : (
@@ -152,7 +148,9 @@ export function SecretClient({ linkId, token }: { linkId: string; token: string 
             {status === "checking" && (
               <div className="bg-white py-8">
                 <Loader2 className="mx-auto mb-6 h-12 w-12 animate-spin text-blue-600" />
-                <h1 className="mb-2 text-xl font-bold text-slate-900">جاري التحقق...</h1>
+                <h1 className="mb-2 text-xl font-bold text-slate-900">
+                  {UI_MESSAGES.secret.checking}
+                </h1>
               </div>
             )}
 
@@ -161,15 +159,15 @@ export function SecretClient({ linkId, token }: { linkId: string; token: string 
                 <div className="mx-auto mb-8 flex h-20 w-20 items-center justify-center rounded-2xl bg-green-50">
                   <CheckCircle2 className="h-10 w-10 text-green-500" />
                 </div>
-                <h1 className="mb-2 text-2xl font-bold text-slate-900">نجاح التخطي!</h1>
-                <p className="mb-8 text-slate-500">
-                  أنت الآن مستعد لإنشاء الكود السري الخاص بك والذي يمنحك 1$ مجاناً!
-                </p>
+                <h1 className="mb-2 text-2xl font-bold text-slate-900">
+                  {UI_MESSAGES.secret.successTitle}
+                </h1>
+                <p className="mb-8 text-slate-500">{UI_MESSAGES.secret.successDesc}</p>
                 <button
                   onClick={generateCode}
                   className="w-full rounded-2xl bg-slate-900 px-8 py-4 text-lg font-bold text-white shadow-lg hover:bg-slate-800"
                 >
-                  إنشاء الكود السري
+                  {UI_MESSAGES.secret.generateButton}
                 </button>
               </div>
             )}
@@ -177,11 +175,9 @@ export function SecretClient({ linkId, token }: { linkId: string; token: string 
             {status === "generated" && (
               <div className="bg-white py-4">
                 <h1 className="mb-2 text-2xl font-bold text-slate-900">
-                  تم إنشاء الكود بنجاح
+                  {UI_MESSAGES.secret.generatedTitle}
                 </h1>
-                <p className="mb-8 text-slate-500">
-                  انسخ الكود ثم الصقه في الصفحة الرئيسية لاسترداد الرصيد.
-                </p>
+                <p className="mb-8 text-slate-500">{UI_MESSAGES.secret.generatedDesc}</p>
 
                 <div className="group relative mb-8 rounded-2xl border-2 border-dashed border-slate-300 bg-slate-50 p-4 sm:p-6">
                   <p className="font-mono text-3xl font-bold tracking-widest break-all text-slate-900 sm:text-4xl sm:tracking-[0.2em]">
@@ -198,7 +194,9 @@ export function SecretClient({ linkId, token }: { linkId: string; token: string 
                   ) : (
                     <Copy className="ml-2 h-6 w-6" />
                   )}
-                  {copied ? "تم النسخ بنجاح! سيتم تحويلك..." : "نسخ الكود والعودة"}
+                  {copied
+                    ? UI_MESSAGES.secret.copiedSuccess
+                    : UI_MESSAGES.secret.copyButton}
                 </button>
               </div>
             )}
@@ -209,7 +207,7 @@ export function SecretClient({ linkId, token }: { linkId: string; token: string 
                   <AlertCircle className="h-10 w-10 text-red-500" strokeWidth={2.5} />
                 </div>
                 <h1 className="mb-4 text-2xl font-bold text-slate-900">
-                  تم تعليق الوصول
+                  {UI_MESSAGES.secret.accessSuspended}
                 </h1>
                 <p className="mb-6 rounded-xl bg-red-50 p-4 text-sm leading-relaxed font-medium text-red-600 sm:text-base">
                   {errorMessage}
@@ -220,14 +218,14 @@ export function SecretClient({ linkId, token }: { linkId: string; token: string 
                     onClick={() => window.location.reload()}
                     className="w-full rounded-2xl bg-blue-600 px-8 py-3.5 text-base font-bold text-white shadow-md transition-colors hover:bg-blue-700"
                   >
-                    أغلقت الـ VPN، أعد الفحص الآن
+                    {UI_MESSAGES.secret.vpnRetryButton}
                   </button>
                 ) : (
                   <button
                     onClick={() => router.push("/")}
                     className="w-full rounded-2xl bg-slate-950 px-8 py-3.5 text-base font-bold text-white shadow-md transition-colors hover:bg-slate-800"
                   >
-                    العودة للرئيسية
+                    {UI_MESSAGES.secret.backHomeButton}
                   </button>
                 )}
 

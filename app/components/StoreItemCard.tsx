@@ -6,6 +6,7 @@ import { StoreItem } from "../lib/data";
 import { toggleStockNotification, getSubscriptionStatus } from "../actions/store";
 import { useAuth } from "./AuthProvider";
 import { toast } from "sonner";
+import { UI_MESSAGES } from "../lib/messages";
 
 interface StoreItemCardProps {
   item: StoreItem;
@@ -42,11 +43,12 @@ export function StoreItemCard({
       <div className="absolute top-6 left-6" dir="ltr">
         {isOutOfStock ? (
           <span className="flex items-center justify-center rounded-full border border-red-100 bg-red-50 px-3 py-1 pt-[5px] pb-[3px] text-xs leading-none font-bold text-red-600">
-            غير متوفر
+            {UI_MESSAGES.store.notAvailable}
           </span>
         ) : (
           <span className="rounded-full border border-blue-100 bg-blue-50 px-3 py-1 text-xs font-bold text-blue-600">
-            المتبقي : {stock}
+            {UI_MESSAGES.store.remaining}
+            {stock}
           </span>
         )}
       </div>
@@ -83,11 +85,11 @@ export function StoreItemCard({
           }`}
         >
           {isOutOfStock ? (
-            "نفدت الكمية"
+            UI_MESSAGES.store.soldOut
           ) : isPurchasing ? (
             <Loader2 className="h-5 w-5 animate-spin" />
           ) : (
-            "شراء الآن"
+            UI_MESSAGES.store.buyNow
           )}
         </button>
 
@@ -102,13 +104,11 @@ export function StoreItemCard({
           >
             {isSubscribed ? (
               <>
-                <BellOff className="h-4 w-4" />
-                إلغاء التنبيه
+                <BellOff className="h-4 w-4" /> {UI_MESSAGES.store.cancelNotify}
               </>
             ) : (
               <>
-                <Bell className="h-4 w-4" />
-                أعلمني عند التوفر
+                <Bell className="h-4 w-4" /> {UI_MESSAGES.store.notifyMe}
               </>
             )}
           </button>

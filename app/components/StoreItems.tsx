@@ -14,6 +14,7 @@ import {
   getUserPurchases,
 } from "../actions/store";
 import { StoreItemCard, StoreItemSkeleton } from "./StoreItemCard";
+import { UI_MESSAGES } from "../lib/messages";
 
 type PurchasedAccount = {
   email: string;
@@ -80,7 +81,7 @@ export const StoreItems = memo(function StoreItems({
         setPastPurchases(res.purchases);
         setHistoryOpen(true);
       } else {
-        toast.error(res.error || "تعذر جلب سجل المشتريات.");
+        toast.error(res.error || UI_MESSAGES.store.historyFetchError);
       }
     } catch (err: unknown) {
       toast.error(err instanceof Error ? err.message : "حدث خطأ غير متوقع.");
@@ -89,15 +90,15 @@ export const StoreItems = memo(function StoreItems({
 
   const handleBuy = async (item: StoreItem) => {
     if (!stockMap || (stockMap[item.id] ?? 0) <= 0) {
-      toast.error("عذراً، هذا المنتج غير متوفر حالياً.");
+      toast.error(UI_MESSAGES.store.outOfStock);
       return;
     }
     if (!user) {
-      toast.error("يرجى تسجيل الدخول أولاً لتتمكن من الشراء.");
+      toast.error(UI_MESSAGES.store.loginRequiredToBuy);
       return;
     }
     if (balance === null || balance < item.price) {
-      toast.error("عذراً، رصيدك غير كافٍ لإتمام عملية الشراء.", {
+      toast.error(UI_MESSAGES.store.insufficientBalance, {
         icon: <div className="font-bold text-red-500">X</div>,
       });
       return;
@@ -127,14 +128,14 @@ export const StoreItems = memo(function StoreItems({
     <section style={style}>
       <div className="mb-6 flex items-center justify-between px-1 sm:mb-10 sm:px-0">
         <h2 className="text-2xl font-bold tracking-tight text-slate-900">
-          المنتجات المتوفرة
+          {UI_MESSAGES.home.storeTitle}
         </h2>
         {user && (
           <button
             onClick={fetchHistory}
             className="cursor-pointer rounded-xl bg-blue-50 px-4 py-2 text-xs font-bold text-blue-600 transition-all hover:bg-blue-100"
           >
-            سجل مشترياتي
+            {UI_MESSAGES.home.storeHistoryButton}
           </button>
         )}
       </div>
