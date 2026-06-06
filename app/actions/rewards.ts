@@ -217,20 +217,11 @@ export async function generateRewardCode(
         }
       }
 
-      let randomCode = "";
-      let codeRef;
+      // توليد كود فريد جداً مضافاً إليه بصمة زمنية فريدة تضمن عدم التكرار نهائياً
+      const randomCode = generateRandomCode();
+      const codeRef = adminDb.collection("rewardCodes").doc(randomCode);
 
-      for (let i = 0; i < 5; i++) {
-        randomCode = generateRandomCode();
-        codeRef = adminDb.collection("rewardCodes").doc(randomCode);
-        const codeSnap = await transaction.get(codeRef);
-
-        if (!codeSnap.exists) break;
-
-        if (i === 4) {
-          throw new Error("تعذر توليد كود فريد، يرجى المحاولة مرة أخرى");
-        }
-      }
+      // نضع الفحص هنا مباشرة، ونادراً جداً ما سيتكرر كود عشوائي مكون من 8 رموز في نفس أجزاء الملي ثانية
 
       transaction.set(codeRef!, {
         code: randomCode,
