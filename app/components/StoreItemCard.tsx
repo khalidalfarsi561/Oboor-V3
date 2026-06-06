@@ -41,7 +41,7 @@ export function StoreItemCard({
     >
       <div className="absolute top-6 left-6" dir="ltr">
         {isOutOfStock ? (
-          <span className="rounded-full border border-red-100 bg-red-50 px-3 py-1 text-xs font-bold text-red-600">
+          <span className="flex items-center justify-center rounded-full border border-red-100 bg-red-50 px-3 py-1 pt-[5px] pb-[3px] text-xs leading-none font-bold text-red-600">
             غير متوفر
           </span>
         ) : (

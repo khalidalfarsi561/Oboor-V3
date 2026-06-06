@@ -35,27 +35,32 @@ export function HomeHeader({ user, balance, signIn, signOut, design }: HomeHeade
           <div className="flex items-center gap-2">
             {/* Minimal Mobile view for logged in user */}
             <div className="relative -top-1 flex items-center gap-2 md:hidden">
-              {/* كرت الرصيد في الجوال */}
+              {/* كرت الرصيد في الجوال - النسخة المعدلة هندسياً للمحاذاة المطلقة */}
               <div
                 className="flex items-center justify-center gap-1.5 rounded-full border border-slate-200 bg-white px-4 py-2.5 shadow-sm"
                 dir="ltr"
                 style={getStyle("wallet")}
               >
-                <AnimatePresence mode="popLayout">
-                  <motion.span
-                    key={balance}
-                    initial={{ opacity: 0, y: -5 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: 5 }}
-                    className="inline-block text-sm font-bold text-slate-800"
-                  >
-                    ${balance !== null ? balance : "..."}
-                  </motion.span>
-                </AnimatePresence>
-                <Wallet
-                  className="h-4 w-4 text-blue-600"
-                  style={getStyle("wallet_icon")}
-                />
+                <div className="flex h-full items-center justify-center">
+                  <AnimatePresence mode="popLayout">
+                    <motion.span
+                      key={balance}
+                      initial={{ opacity: 0, y: -5 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: 5 }}
+                      className="flex items-center justify-center pt-[5px] text-sm leading-none font-bold text-slate-800"
+                    >
+                      ${balance !== null ? balance : "..."}
+                    </motion.span>
+                  </AnimatePresence>
+                </div>
+
+                <div className="flex items-center justify-center">
+                  <Wallet
+                    className="h-4 w-4 text-blue-600"
+                    style={getStyle("wallet_icon")}
+                  />
+                </div>
               </div>
 
               {/* حاوية الصورة الشخصية والقائمة المنبثقة */}
