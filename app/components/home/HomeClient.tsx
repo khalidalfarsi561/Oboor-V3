@@ -96,7 +96,7 @@ export function HomeClient({
     <div className="relative min-h-screen bg-slate-50 selection:bg-blue-100">
       <div className="pointer-events-none absolute inset-x-0 top-0 h-64 bg-gradient-to-b from-blue-50 to-transparent" />
 
-      <main className="relative z-10 mx-auto max-w-6xl px-4 py-8 sm:px-6 md:py-10 lg:px-8">
+      <main className="relative z-10 mx-auto max-w-6xl px-4 pt-[16px] pb-8 sm:px-6 md:pt-[30px] md:pb-10 lg:px-8">
         <HomeHeader
           user={user}
           balance={balance}
