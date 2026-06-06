@@ -1,8 +1,15 @@
 import React from "react";
+import { Metadata } from "next";
 import { unstable_cache } from "next/cache";
 import { getStoreStock } from "./actions/store";
 import { HomeClient } from "./components/home/HomeClient";
 import { getPublicSiteSettings } from "./lib/site-settings";
+
+export const metadata: Metadata = {
+  title: "متجر المكافآت - الرئسية",
+  description:
+    "احصل على رصيد مجاني يومياً عن طريق تخطي الروابط المختصرة واسترداده فوراً في متجر المكافآت.",
+};
 
 export const revalidate = 0;
 

@@ -37,7 +37,7 @@ export function HomeHeader({ user, balance, signIn, signOut, design }: HomeHeade
             <div className="relative -top-1 flex items-center gap-2 md:hidden">
               {/* كرت الرصيد في الجوال - النسخة المعدلة هندسياً للمحاذاة المطلقة */}
               <div
-                className="flex items-center justify-center gap-1.5 rounded-full border border-slate-200 bg-white px-4 py-2.5 shadow-sm"
+                className="flex h-[40px] min-w-[80px] items-center justify-center gap-1.5 rounded-full border border-slate-200 bg-white px-4 py-2.5 shadow-sm"
                 dir="ltr"
                 style={getStyle("wallet")}
               >
@@ -123,7 +123,7 @@ export function HomeHeader({ user, balance, signIn, signOut, design }: HomeHeade
               <NotificationCenter userId={user.uid} />
 
               <div
-                className="flex items-center justify-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 shadow-sm"
+                className="flex h-[42px] min-w-[85px] items-center justify-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 shadow-sm"
                 dir="ltr"
                 title="الرصيد/المحفظة"
                 style={getStyle("wallet")}

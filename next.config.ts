@@ -54,7 +54,8 @@ const nextConfig: NextConfig = {
         headers: [
           {
             key: "Content-Security-Policy",
-            value: "frame-ancestors 'self';",
+            value:
+              "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://apis.google.com https://www.googleapis.com https://identitytoolkit.googleapis.com https://*.firebaseapp.com; object-src 'none'; frame-ancestors 'self';",
           },
           {
             key: "X-Frame-Options",
