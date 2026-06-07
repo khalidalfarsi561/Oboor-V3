@@ -255,60 +255,56 @@ import puppeteer from "puppeteer-core";
 
 export async function sendCanvaInvitation(userEmail: string) {
   // 1. جلب الكوكيز والتوكنز من إعدادات السيرفر بـ Firestore
-  const settingsSnap = await adminDb.collection("settings").doc("canvaConfig").get(); // [cite: 1311]
+  const settingsSnap = await adminDb.collection("settings").doc("canvaConfig").get();
   if (!settingsSnap.exists) {
-    // [cite: 1312]
-    throw new Error("لم يتم تهيئة كوكيز حساب كانفا في لوحة التحكم بعد."); // [cite: 1312]
+    throw new Error("لم يتم تهيئة كوكيز حساب كانفا في لوحة التحكم بعد.");
   }
 
-  const config = settingsSnap.data(); //
-  const canvaCookies = config?.cookies || ""; //
+  const config = settingsSnap.data();
+  const canvaCookies = config?.cookies || "";
 
   // 2. رابط الاتصال بـ Browserless مع تفعيل وضع التخفي (Stealth Mode)
-  const BROWSERLESS_API_KEY = process.env.BROWSERLESS_API_KEY; //
+  const BROWSERLESS_API_KEY = process.env.BROWSERLESS_API_KEY;
   if (!BROWSERLESS_API_KEY) {
-    //
-    throw new Error("لم يتم تكوين BROWSERLESS_API_KEY في السيرفر."); //
+    throw new Error("لم يتم تكوين BROWSERLESS_API_KEY في السيرفر.");
   }
-  const browserWSEndpoint = `wss://chrome.browserless.io?token=${BROWSERLESS_API_KEY}&stealth=true&--disable-blink-features=AutomationControlled`; //
+  const browserWSEndpoint = `wss://chrome.browserless.io?token=${BROWSERLESS_API_KEY}&stealth=true&--disable-blink-features=AutomationControlled`;
 
   let browser;
   try {
     // 3. الاتصال بالمتصفح السحابي عن بعد
-    browser = await puppeteer.connect({ browserWSEndpoint }); // [cite: 1314]
-    const page = await browser.newPage(); // [cite: 1314]
+    browser = await puppeteer.connect({ browserWSEndpoint });
+    const page = await browser.newPage();
 
-    // ضبط أبعاد الشاشة ومحاكاة مظهر حقيقي تماماً
+    // ضبط أبعاد الشاشة ومحاكاة مظهر ديسكتوب عريض ومستقر
     await page.setViewport({ width: 1920, height: 1080 });
 
-    // 4. تعيين حقل الـ User-Agent ليبدو كمتصفح منزلي طبيعي
+    // 4. تعيين حقل الـ User-Agent ليبدو كمتصفح طبيعي
     await page.setUserAgent(
       "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36"
     );
 
     // 5. تهيئة وحقن الكوكيز داخل المتصفح السحابي قبل فتح الصفحة
     const cookieArray = canvaCookies.split(";").map((pair: string) => {
-      // [cite: 1314]
-      const [name, ...valueParts] = pair.trim().split("="); // [cite: 1314]
+      const [name, ...valueParts] = pair.trim().split("=");
       return {
-        name: name, // [cite: 1314]
-        value: valueParts.join("="), // [cite: 1314]
-        domain: ".canva.com", // [cite: 1314]
-        path: "/", // [cite: 1314]
+        name: name,
+        value: valueParts.join("="),
+        domain: ".canva.com",
+        path: "/",
       };
     });
-    await page.setCookie(...cookieArray); // [cite: 1314]
+    await page.setCookie(...cookieArray);
 
     // 6. التوجه إلى صفحة الأعضاء في كانفا والانتظار حتى استقرار الشبكة
     await page.goto("https://www.canva.com/settings/people", {
-      // [cite: 1314]
-      waitUntil: "networkidle2", // [cite: 1314]
-      timeout: 50000, // [cite: 1314]
+      waitUntil: "networkidle2",
+      timeout: 50000,
     });
 
     // 7. الأتمتة المرئية الذكية والمقاومة للنوافذ المنبثقة وتغير العناصر
     try {
-      // 🍪 [تخطي بنر الكوكيز]: البحث الفوري عن زر القبول وإغلاقه آلياً
+      // 🍪 [تخطي بنر الكوكيز]
       const buttons = await page.$$("button");
       for (const button of buttons) {
         const text = await page.evaluate((el) => el.textContent, button);
@@ -320,8 +316,8 @@ export async function sendCanvaInvitation(userEmail: string) {
         }
       }
 
-      // 📧 [الخطوة 2]: البحث الشامل والديناميكي عن زر "Invite people" المفتوح في الواجهة
-      console.log("🔍 جاري الفحص الديناميكي القاطع عن زر Invite people الحقيقي...");
+      // 📧 [الخطوة 2]: النقر على زر "Invite people" المفتوح في الواجهة
+      console.log("🔍 جاري الفحص الديناميكي عن زر Invite people الحقيقي...");
       const allClickables = await page.$$("button, a, div[role='button']");
       let clickedInvite = false;
 
@@ -348,34 +344,54 @@ export async function sendCanvaInvitation(userEmail: string) {
         await page.click("button, a:has-text('Invite people')").catch(() => null);
       }
 
-      // ⏳ [تحديث جوهري]: الانتظار ثانيتين ونصف لتستقر النافذة التعبيرية لكانفا تماماً وينبثق الحقل بشكل آمن
+      // الانتظار ثانيتين ونصف لتستقر النافذة التعبيرية لكانفا تماماً وينبثق الحقل بشكل آمن
       await new Promise((resolve) => setTimeout(resolve, 2500));
 
-      // 📧 [الخطوة 3]: استهدف حقل البريد الإلكتروني المخصص وانتظار رؤيته وثباته
-      console.log("✏️ جاري حقن البريد الإلكتروني للعميل بشكل مستقر...");
+      // 📧 [الخطوة 3 المحدثة لحل مشكلة الزر الرمادي]:
+      console.log("✏️ جاري حقن البريد الإلكتروني للعميل وإطلاق نبضات التفعيل البشري...");
       const inputSelector =
         "input.bCVoGQ, input[placeholder='Enter email address...'], input[inputmode='email']";
       await page.waitForSelector(inputSelector, { timeout: 15000, visible: true });
 
-      // إدخال النص برمجياً عبر الـ JavaScript لضمان عدم حدوث تعارض Target Close
+      // 🚀 نقوم بعمل Focus حقيقي أولاً
+      await page.focus(inputSelector);
+
+      // حقن الإيميل كاملاً ما عدا الحرف الأخير برمجياً لتسريع العملية
+      const emailPrefix = userEmail.slice(0, -1);
+      const emailLastChar = userEmail.slice(-1);
+
       await page.evaluate(
-        (selector, email) => {
-          const input = document.querySelector(selector) as HTMLInputElement;
+        (selector, text) => {
+          const input = document.querySelector(selector);
           if (input) {
-            input.value = email;
+            // استخدام تكتيك التعيين الديناميكي لتخطي قيود التايب سكريبت في السيرفر
+            (input as any).value = text;
+
+            // إطلاق كافة أحداث الإدخال لجعل المتصفح يستيقظ
+            input.dispatchEvent(new Event("focus", { bubbles: true }));
             input.dispatchEvent(new Event("input", { bubbles: true }));
             input.dispatchEvent(new Event("change", { bubbles: true }));
           }
         },
         inputSelector,
-        userEmail
+        emailPrefix
       );
 
-      // ⏳ [تحديث جوهري]: انتظار ثانية ونصف كاملة ليستوعب كود كانفا الإيميل ويستقر زر التأكيد تماماً
+      // 💥 [الضربة القاضية]: محاكاة كتابة الحرف الأخير بالـ Keyboard الفعلي للـ Puppeteer
+      // هذا الحرف يجعل كود كانفا يرى حركة كيبورد حقيقية فينشط الزر البنفسجي فوراً!
+      await page.type(inputSelector, emailLastChar, { delay: 100 });
+
+      // تحريك الماوس أو عمل مسح للـ Focus للتأكيد
+      await page.evaluate((selector) => {
+        const input = document.querySelector(selector) as HTMLInputElement;
+        if (input) input.dispatchEvent(new Event("blur", { bubbles: true }));
+      }, inputSelector);
+
+      // انتظار ثانية ونصف كاملة ليستوعب كود كانفا الحرف ويتحول الزر للون البنفسجي النشط
       await new Promise((resolve) => setTimeout(resolve, 1500));
 
-      // 📧 [الخطوة 4 المحدثة]: الضغط البرمجي القاطع على زر "Confirm and invite" لتفادي الـ Target Closed
-      console.log("🚀 جاري معالجة النقر البرمجي على زر تأكيد وإرسال الدعوة النهائي...");
+      // 📧 [الخطوة 4]: الضغط على زر "Confirm and invite" النهائي لتفجير الإرسال
+      console.log("🚀 جاري الضغط على زر تأكيد وإرسال الدعوة البنفسجي النشط...");
 
       const clickedConfirm = await page.evaluate(() => {
         const finalButtons = Array.from(document.querySelectorAll("button"));
@@ -384,36 +400,39 @@ export async function sendCanvaInvitation(userEmail: string) {
           if (
             btnText.includes("Confirm and invite") ||
             btnText.includes("Confirm") ||
-            btnText.includes("تأكيد ودعوة") ||
-            btnText.includes("إرسال التفعيل")
+            btnText.includes("تأكيد") ||
+            btnText.includes("إرسال")
           ) {
-            (btn as HTMLButtonElement).click(); // نقر برمجي مباشر من داخل المتصفح السحابي
-            return true;
+            // التحقق من أن الزر لم يعد معطلاً قبل نقره
+            if (!(btn as HTMLButtonElement).disabled) {
+              (btn as HTMLButtonElement).click();
+              return true;
+            }
           }
         }
         return false;
       });
 
-      // خط دفاع تكميلي: إذا لم يجد الزر عبر نصوص الـ JavaScript، يرسل الطلب فوراً عبر لوحة المفاتيح
       if (!clickedConfirm) {
         console.log(
-          "🔄 لم يتم العثور على نص الزر برمجياً، جاري الإرسال عبر محاكاة كيبورد Enter..."
+          "🔄 لم يتم النقر عبر السكريبت، جاري الإرسال النهائي عبر كيبورد Enter..."
         );
         await page.keyboard.press("Enter");
       } else {
-        console.log("✅ تم النقر برمجياً بنجاح على زر التأكيد القاطع!");
+        console.log("✅ تم الضغط بنجاح على الزر البنفسجي بعد تنشيطه كلياً!");
       }
 
       console.log(`✅ تم إنهاء معالجة الضغط النهائي بنجاح لإيميل العميل: ${userEmail}`);
 
-      // الانتظار 5 ثوانٍ كاملة لضمان استقرار الطلب الخلفي وإصدار الدعوة من خوادم كانفا قبل الإغلاق
-      await new Promise((resolve) => setTimeout(resolve, 5000));
+      // التقاط صورة نجاح نهائية لمراقبة خروج الطلب بنجاح للبريد
+      await new Promise((resolve) => setTimeout(resolve, 3000));
+      await page.screenshot({ path: "canva-success-check.jpg" }).catch(() => null);
 
-      await page.screenshot({ path: "canva-success-check.png" }).catch(() => null);
+      await new Promise((resolve) => setTimeout(resolve, 2000));
       await browser.close();
       return true;
     } catch (selectorError) {
-      console.warn("⚠️ حدث عائق أثناء الأتمتة، جاري محاولة التقاط صورة سريعة...");
+      console.warn("⚠️ حدث عائق أثناء الأتمتة، جاري التقاط صورة سريعة...");
       if (browser) {
         await page.screenshot({ path: "canva-error.png" }).catch(() => null);
         await browser.close().catch(() => null);
@@ -421,10 +440,9 @@ export async function sendCanvaInvitation(userEmail: string) {
       throw selectorError;
     }
   } catch (error: any) {
-    // [cite: 1314]
-    console.error("Browserless อلตมAutomation Error:", error); // [cite: 1314]
-    if (browser) await browser.close().catch(() => null); // [cite: 1314]
-    throw new Error(error.message || "فشل المتصفح السحابي في إرسال الدعوة."); // [cite: 1314]
+    console.error("Browserless Automation Error:", error);
+    if (browser) await browser.close().catch(() => null);
+    throw new Error(error.message || "فشل المتصفح السحابي في إرسال الدعوة.");
   }
 }
 
