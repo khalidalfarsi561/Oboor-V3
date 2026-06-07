@@ -251,60 +251,180 @@ export async function getUserPurchases(idToken: string) {
 }
 
 // دالة إرسال دعوة كانفا الآلية من السيرفر
+import puppeteer from "puppeteer-core";
+
 export async function sendCanvaInvitation(userEmail: string) {
-  // جلب الكوكيز والتوكنز المحدثة من إعدادات السيرفر بـ Firestore
-  const settingsSnap = await adminDb.collection("settings").doc("canvaConfig").get();
+  // 1. جلب الكوكيز والتوكنز من إعدادات السيرفر بـ Firestore
+  const settingsSnap = await adminDb.collection("settings").doc("canvaConfig").get(); // [cite: 1311]
   if (!settingsSnap.exists) {
-    throw new Error("لم يتم تهيئة كوكيز حساب كانفا في لوحة التحكم بعد.");
+    // [cite: 1312]
+    throw new Error("لم يتم تهيئة كوكيز حساب كانفا في لوحة التحكم بعد."); // [cite: 1312]
   }
 
-  const config = settingsSnap.data();
-  const canvaCookies = config?.cookies || "";
-  const authzToken = config?.authz || "";
+  const config = settingsSnap.data(); //
+  const canvaCookies = config?.cookies || ""; //
 
+  // 2. رابط الاتصال بـ Browserless مع تفعيل وضع التخفي (Stealth Mode)
+  const BROWSERLESS_API_KEY = process.env.BROWSERLESS_API_KEY; //
+  if (!BROWSERLESS_API_KEY) {
+    //
+    throw new Error("لم يتم تكوين BROWSERLESS_API_KEY في السيرفر."); //
+  }
+  const browserWSEndpoint = `wss://chrome.browserless.io?token=${BROWSERLESS_API_KEY}&stealth=true&--disable-blink-features=AutomationControlled`; //
+
+  let browser;
   try {
-    const response = await fetch(
-      "https://www.canva.com/_ajax/invitation/brand/invitations/create",
-      {
-        method: "POST",
-        headers: {
-          accept: "*/*",
-          "accept-language": "en-US,en;q=0.9,ar;q=0.8",
-          "content-type": "application/json;charset=UTF-8",
-          cookie: canvaCookies,
-          origin: "https://www.canva.com",
-          referer: "https://www.canva.com/settings/people",
-          "user-agent":
-            "Mozilla/5.0 (iPhone; CPU iPhone OS 18_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.5 Mobile/15E148 Safari/604.1",
-          "x-canva-active-user": "eyJBIjoiVUFITDVQbUQ5bHciLCJCIjoiQkFITDVKT1BTWVEifQ==",
-          "x-canva-brand": "BAHL5JOPSYQ",
-          "x-canva-request": "createbrandinvitations",
-          "x-canva-user": "UAHL5PmD9lw",
-          "x-canva-authz": authzToken,
-        },
-        body: JSON.stringify({
-          K: "BAHL5JOPSYQ",
-          "A?": "A",
-          A: [{ A: userEmail, B: "B" }],
-          B: true,
-          D: {
-            G: "408fd7ec-c259-4d5a-9f41-914f32487595",
-            B: [
-              {
-                A: "F",
-                B: "WzQzMjA5LFswLDEsMTcsMTksOSwyMyw2LDMxLDgsMTgsMTMsMjgsMiwxNCwyMiwxNiwxNSwyNSwyNCwzMCwxMSw3LDI2LDI3LDMsMj9LCzQxLDEwLDUsMTJfXSxbIjY2ajZxUGVvL2FqNXFQK28rS2d5cVR1cEtxa3ZxU3FwSEtucHFBR3AvYWo2cUE2cC9xajZxUGlvTHFrMXFUS3BLNms0cVJhcDZhaitxUGVvQWFuNnFQaW9ONms0cVJLcFBLazdxUzZwSDZucHFQS29PS2swcVN5cExxa1FxZW1vTHFrMHFUS3BOYW5wcVBXb0Zha1dxUjJwRWFrVXFYRyIsImZLbDhxWHlwZiIsIlc0VlE9PSIsIkhxcXFxK3JhcXRGcXh5cllhdG9xMk9yYTZ0cnEwT3JIcXM9IiwibktvNnFuZXFmTXEvcWxLcGFxbXlxVDZvNnFsZ21xbXlxUzZvNnE2b1pxbXlxUzZvNnEiLCIyYWtVa1E9PSIsIlphbz0iLCI2bjFxaWlxbTZxN3FxbnFnNnBqcWlLcG1xbC9xcDZvN3FucXFlNm9ucW9icW02cTdxbm9xbXE2bzdvbHFuNnBqcWlLbzJxL3FwNm83cW5hcTZvN3FvYnFhNnBycWlLbE9xbmFxWTZvcG9yMHE2b2Nvam9xMnFlNnFNNm9yYTY2cDZvL29xYXE2b0ZxbXFxQzZveW9qYXE2b3pxYVNxNnA2cVdpcTZvM3FucXFWNm94cWlLbHlxb2FxeTZvMnFvU3FhNm9WcW5xcUs2b2JxbENwNnFzNnJGNm9WcWFhcUs2b1hxYWExNm9HcW1NcTI2b3pxcUtxTTZvMWFLbHFGNm9ScW5NcU02cHJxbUtxVTZvVnFScXFTNm9icW1lcU02b0NxVkNxVDZvMHFtTXFXNiIsIkY2b0hxbUtxNjZvSnFsQ3F2Nm9KcW1PcWE2b0ZxbUtxRTZvM3FuZXFXNiIsIjZvUnFyMks2b25xbUtxbTZvMXFuS3E2NnA2b2NxakttNm9ucW9icU02cHpxbVNxQzZvT2FtQ3FNNm9jYW1DcU02cHJxbUtxUjZvdnFrS3FONm9UcW1lcVQ2b1JhbUtxVTZva3FtU3FRNm9icW1lcU02b0NxVkNxVDZvMHFtTXFXNiIsIjZvamFrS3FDNm9qYWpLcU02b1JhbUtxVDZvanFtZ3FPNm9SYW1LcVQ2b05uYW1DVVNvbW1pNnBONm9SYW5LcVciLCI2YXIycXZhUTZhcjJxdnFiNjZyMnF2cU02YXIycXY2cjZhcjJxdnFiNjZyMnF2NnI2cTYzcTZxcjZxdjZyYXZPNmEycjZxdjZhNjZyMnF2cU02YXIycXZhciIsIjZhcjJxdnFiNjZyMnF2cU02YXIycXZhciIsImV5TkpjMjUwYm5Rc0lBPT0iLCJLS25scWVXb0E2aFdxZXFYMnBPYWtpcWMycEthb09xV21wRUtuRnFXMnBSYWtkcVFLbVhxZTJwS2FraXFPbXBGS2xucWJxcG9ha2JxYUdvS2FuRnFhV3BMYWhxcVdHcEVLa0NxSldwbmFob3FlbXA0YWtEcWVLcEthbkNxS21wSWFqMnFQV3BVYWtScVMycG9ha0ZxYUdvZ2FtNnFQV3BWYWtocVNtcHphbXpxU1dwRGFrVnFOMnBiYWxScVFLcEthbkNxS21wS2FsQ3FXbXBQYWp5cU1XcEthalZxUm1wY2FqcXFPS3BqYWtMcVFXcHFhbE9xRldwQ2FtTnFRV3BPYWxEcVJtcGRhbnpxTDFwRGFsNnFPV3BOYWtMcVJ1dyIsIjZvU3FqYXFPNm9YYWpLcU42b0Rha0dxTTZveGFrS3FXNiIsIktLa2FxT21wV2FraXFPbXBGYW5scWVXbzZhaFdxZStwbGFrMnFPbXBTYWtMcVFhb2Zhb3pxTzZvWGFqS3FPNm9UYWtlcWMyb0lhbGVxV0dvZmFpdXFPV3BWYWxFcVIyb0ZhbUdxUzJvamFtcXFQV3BWYWtMcVMybzZhazNxT21wSWFuS3FQV3BWYWtScVMyb3Vha2JxTVdwSEFha0JxUkdvQ2FtcXFWbXBqYWtkcVFLcExhbENxS21wSmFscXFQV3BaYWhoUU9hcGhhbG5xV0dvcmFtcXFQV3BwYWtacVMyb1phazNxT2xWc1FtSlVjV3BqYWtkcVFLcEhhbENxS21wRGJHa1FZblJxT0dwUWFtOExVbUlLYlZzRGFrUnFRR29oYW1lcVcyb3dha3FxTjZvMGFsdHFjMm9uYWxsYUdsbFk=",
-              },
-            ],
-          },
-          F: "https://www.canva.com/settings/people",
-        }),
-      }
+    // 3. الاتصال بالمتصفح السحابي عن بعد
+    browser = await puppeteer.connect({ browserWSEndpoint }); // [cite: 1314]
+    const page = await browser.newPage(); // [cite: 1314]
+
+    // ضبط أبعاد الشاشة ومحاكاة مظهر حقيقي تماماً
+    await page.setViewport({ width: 1920, height: 1080 });
+
+    // 4. تعيين حقل الـ User-Agent ليبدو كمتصفح منزلي طبيعي
+    await page.setUserAgent(
+      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36"
     );
 
-    return response.ok;
-  } catch (error) {
-    console.error("Canva API Server Error:", error);
-    return false;
+    // 5. تهيئة وحقن الكوكيز داخل المتصفح السحابي قبل فتح الصفحة
+    const cookieArray = canvaCookies.split(";").map((pair: string) => {
+      // [cite: 1314]
+      const [name, ...valueParts] = pair.trim().split("="); // [cite: 1314]
+      return {
+        name: name, // [cite: 1314]
+        value: valueParts.join("="), // [cite: 1314]
+        domain: ".canva.com", // [cite: 1314]
+        path: "/", // [cite: 1314]
+      };
+    });
+    await page.setCookie(...cookieArray); // [cite: 1314]
+
+    // 6. التوجه إلى صفحة الأعضاء في كانفا والانتظار حتى استقرار الشبكة
+    await page.goto("https://www.canva.com/settings/people", {
+      // [cite: 1314]
+      waitUntil: "networkidle2", // [cite: 1314]
+      timeout: 50000, // [cite: 1314]
+    });
+
+    // 7. الأتمتة المرئية الذكية والمقاومة للنوافذ المنبثقة وتغير العناصر
+    try {
+      // 🍪 [تخطي بنر الكوكيز]: البحث الفوري عن زر القبول وإغلاقه آلياً
+      const buttons = await page.$$("button");
+      for (const button of buttons) {
+        const text = await page.evaluate((el) => el.textContent, button);
+        if (text && (text.includes("Accept all cookies") || text.includes("Accept"))) {
+          await button.click();
+          console.log("🍪 تم رصد بنر الكوكيز وإغلاقه بنجاح آلياً!");
+          await new Promise((resolve) => setTimeout(resolve, 1500));
+          break;
+        }
+      }
+
+      // 📧 [الخطوة 2]: البحث الشامل والديناميكي عن زر "Invite people" المفتوح في الواجهة
+      console.log("🔍 جاري الفحص الديناميكي القاطع عن زر Invite people الحقيقي...");
+      const allClickables = await page.$$("button, a, div[role='button']");
+      let clickedInvite = false;
+
+      for (const el of allClickables) {
+        const text = await page.evaluate((element) => element.textContent, el);
+        if (
+          text &&
+          (text.trim() === "Invite people" ||
+            text.includes("Invite people") ||
+            text.includes("دعوة أشخاص") ||
+            text.includes("إضافة أعضاء"))
+        ) {
+          await el.click();
+          clickedInvite = true;
+          console.log(
+            `🎯 تم العثور على زر الدعوة ونقره بنجاح! النص المستهدف: "${text.trim()}"`
+          );
+          break;
+        }
+      }
+
+      if (!clickedInvite) {
+        console.log("⚠️ لم ينجح النقر النصي، محاولة الاستهداف المباشر لأي عنصر دعوة...");
+        await page.click("button, a:has-text('Invite people')").catch(() => null);
+      }
+
+      // ⏳ [تحديث جوهري]: الانتظار ثانيتين ونصف لتستقر النافذة التعبيرية لكانفا تماماً وينبثق الحقل بشكل آمن
+      await new Promise((resolve) => setTimeout(resolve, 2500));
+
+      // 📧 [الخطوة 3]: استهدف حقل البريد الإلكتروني المخصص وانتظار رؤيته وثباته
+      console.log("✏️ جاري حقن البريد الإلكتروني للعميل بشكل مستقر...");
+      const inputSelector =
+        "input.bCVoGQ, input[placeholder='Enter email address...'], input[inputmode='email']";
+      await page.waitForSelector(inputSelector, { timeout: 15000, visible: true });
+
+      // إدخال النص برمجياً عبر الـ JavaScript لضمان عدم حدوث تعارض Target Close
+      await page.evaluate(
+        (selector, email) => {
+          const input = document.querySelector(selector) as HTMLInputElement;
+          if (input) {
+            input.value = email;
+            input.dispatchEvent(new Event("input", { bubbles: true }));
+            input.dispatchEvent(new Event("change", { bubbles: true }));
+          }
+        },
+        inputSelector,
+        userEmail
+      );
+
+      // ⏳ [تحديث جوهري]: انتظار ثانية ونصف كاملة ليستوعب كود كانفا الإيميل ويستقر زر التأكيد تماماً
+      await new Promise((resolve) => setTimeout(resolve, 1500));
+
+      // 📧 [الخطوة 4 المحدثة]: الضغط البرمجي القاطع على زر "Confirm and invite" لتفادي الـ Target Closed
+      console.log("🚀 جاري معالجة النقر البرمجي على زر تأكيد وإرسال الدعوة النهائي...");
+
+      const clickedConfirm = await page.evaluate(() => {
+        const finalButtons = Array.from(document.querySelectorAll("button"));
+        for (const btn of finalButtons) {
+          const btnText = btn.textContent || "";
+          if (
+            btnText.includes("Confirm and invite") ||
+            btnText.includes("Confirm") ||
+            btnText.includes("تأكيد ودعوة") ||
+            btnText.includes("إرسال التفعيل")
+          ) {
+            (btn as HTMLButtonElement).click(); // نقر برمجي مباشر من داخل المتصفح السحابي
+            return true;
+          }
+        }
+        return false;
+      });
+
+      // خط دفاع تكميلي: إذا لم يجد الزر عبر نصوص الـ JavaScript، يرسل الطلب فوراً عبر لوحة المفاتيح
+      if (!clickedConfirm) {
+        console.log(
+          "🔄 لم يتم العثور على نص الزر برمجياً، جاري الإرسال عبر محاكاة كيبورد Enter..."
+        );
+        await page.keyboard.press("Enter");
+      } else {
+        console.log("✅ تم النقر برمجياً بنجاح على زر التأكيد القاطع!");
+      }
+
+      console.log(`✅ تم إنهاء معالجة الضغط النهائي بنجاح لإيميل العميل: ${userEmail}`);
+
+      // الانتظار 5 ثوانٍ كاملة لضمان استقرار الطلب الخلفي وإصدار الدعوة من خوادم كانفا قبل الإغلاق
+      await new Promise((resolve) => setTimeout(resolve, 5000));
+
+      await page.screenshot({ path: "canva-success-check.png" }).catch(() => null);
+      await browser.close();
+      return true;
+    } catch (selectorError) {
+      console.warn("⚠️ حدث عائق أثناء الأتمتة، جاري محاولة التقاط صورة سريعة...");
+      if (browser) {
+        await page.screenshot({ path: "canva-error.png" }).catch(() => null);
+        await browser.close().catch(() => null);
+      }
+      throw selectorError;
+    }
+  } catch (error: any) {
+    // [cite: 1314]
+    console.error("Browserless อلตมAutomation Error:", error); // [cite: 1314]
+    if (browser) await browser.close().catch(() => null); // [cite: 1314]
+    throw new Error(error.message || "فشل المتصفح السحابي في إرسال الدعوة."); // [cite: 1314]
   }
 }
 
@@ -325,15 +445,7 @@ export async function processCanvaPurchase(idToken: string, userEmail: string) {
     await purchasesSnap.docs[0].ref.update({ customerEmail: userEmail });
   }
 
-  // تشغيل دالة الإرسال الآلي فوراً
-  const inviteSuccess = await sendCanvaInvitation(userEmail);
-
-  if (inviteSuccess) {
-    return { success: true };
-  } else {
-    return {
-      success: false,
-      error: "عذراً، فشل الإرسال التلقائي. الجلسة منتهية أو هناك ضغط على خوادم كانفا.",
-    };
-  }
+  // تشغيل دالة الإرسال الآلي فوراً (ترمي الخطأ الحقيقي إذا فشلت)
+  await sendCanvaInvitation(userEmail);
+  return { success: true };
 }

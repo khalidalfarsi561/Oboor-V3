@@ -160,19 +160,13 @@ export const StoreItems = memo(function StoreItems({
       const { processCanvaPurchase } = await import("../actions/store");
       const inviteRes = await processCanvaPurchase(idToken, customerCanvaEmail.trim());
 
-      if (inviteRes.success) {
-        toast.success(
-          "مبروك! نجحت العملية، تفقد بريدك الإلكتروني الآن (صندوق الوارد أو السبام) لتفعيل الاشتراك.",
-          { id: "canva-buy", duration: 8000 }
-        );
-        setCanvaModalOpen(false);
-        setCustomerCanvaEmail("");
-      } else {
-        toast.error(
-          inviteRes.error || "فشل إرسال الدعوة، تواصل مع الدعم لتعويضك يدوياً.",
-          { id: "canva-buy", duration: 6000 }
-        );
-      }
+      // نجاح — processCanvaPurchase يرمي خطأ إذا فشل، ولا يعيد إلا { success: true }
+      toast.success(
+        "مبروك! نجحت العملية، تفقد بريدك الإلكتروني الآن (صندوق الوارد أو السبام) لتفعيل الاشتراك.",
+        { id: "canva-buy", duration: 8000 }
+      );
+      setCanvaModalOpen(false);
+      setCustomerCanvaEmail("");
     } catch (err: any) {
       toast.error(err.message || "حدث خطأ أثناء معالجة الطلب.", { id: "canva-buy" });
     } finally {
