@@ -44,6 +44,9 @@ export const StoreItems = memo(function StoreItems({
   const [purchasedAccount, setPurchasedAccount] = useState<PurchasedAccount | null>(null);
   const [historyOpen, setHistoryOpen] = useState(false);
   const [pastPurchases, setPastPurchases] = useState<PastPurchase[]>([]);
+  const [canvaModalOpen, setCanvaModalOpen] = useState(false);
+  const [customerCanvaEmail, setCustomerCanvaEmail] = useState("");
+  const [canvaSubmitting, setCanvaSubmitting] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -104,6 +107,13 @@ export const StoreItems = memo(function StoreItems({
       return;
     }
 
+    // إذا كان المنتج المختار هو كانفا (id: 2)، نفتح نافذة طلب الإيميل فوراً
+    if (item.id === 2) {
+      setCanvaModalOpen(true);
+      return;
+    }
+
+    // شراء المنتجات العادية ذات الحسابات الجاهزة (كاب كات)
     setPurchasingId(item.id);
     try {
       const idToken = await user.getIdToken();
@@ -121,6 +131,52 @@ export const StoreItems = memo(function StoreItems({
       toast.error(err instanceof Error ? err.message : "حدث خطأ غير متوقع أثناء الشراء.");
     } finally {
       setPurchasingId(null);
+    }
+  };
+
+  // دالة معالجة شراء وإرسال دعوة كانفا التلقائية
+  const handleCanvaSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!customerCanvaEmail.trim() || !customerCanvaEmail.includes("@")) {
+      toast.error("يرجى إدخال بريد إلكتروني صحيح.");
+      return;
+    }
+
+    if (!user) {
+      toast.error("يجب تسجيل الدخول أولاً.");
+      return;
+    }
+
+    setCanvaSubmitting(true);
+    toast.loading("جاري حجز رصيدك وإرسال دعوة كانفا برو آلياً...", { id: "canva-buy" });
+
+    try {
+      const idToken = await user.getIdToken();
+
+      // أولاً: خصم الرصيد وتنفيذ عملية الشراء الهيكلية عبر الـ Backend الأساسي للمتجر
+      await purchaseItem(idToken, 2);
+
+      // ثانياً: استدعاء سكريبت السيرفر التلقائي لحقن الكوكيز وإرسال الدعوة إلى إيميل العميل فوراً
+      const { processCanvaPurchase } = await import("../actions/store");
+      const inviteRes = await processCanvaPurchase(idToken, customerCanvaEmail.trim());
+
+      if (inviteRes.success) {
+        toast.success(
+          "مبروك! نجحت العملية، تفقد بريدك الإلكتروني الآن (صندوق الوارد أو السبام) لتفعيل الاشتراك.",
+          { id: "canva-buy", duration: 8000 }
+        );
+        setCanvaModalOpen(false);
+        setCustomerCanvaEmail("");
+      } else {
+        toast.error(
+          inviteRes.error || "فشل إرسال الدعوة، تواصل مع الدعم لتعويضك يدوياً.",
+          { id: "canva-buy", duration: 6000 }
+        );
+      }
+    } catch (err: any) {
+      toast.error(err.message || "حدث خطأ أثناء معالجة الطلب.", { id: "canva-buy" });
+    } finally {
+      setCanvaSubmitting(false);
     }
   };
 
@@ -262,6 +318,60 @@ export const StoreItems = memo(function StoreItems({
                   ))
                 )}
               </div>
+            </div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* نافذة طلب إيميل كانفا التلقائي */}
+      <AnimatePresence>
+        {canvaModalOpen && (
+          <div className="fixed inset-0 z-[999] flex items-center justify-center bg-slate-950/60 p-4 backdrop-blur-sm">
+            <div className="w-full max-w-md rounded-[32px] border border-white/20 bg-white p-6 shadow-2xl">
+              <div className="mb-5 flex items-start justify-between gap-4">
+                <div>
+                  <h3 className="text-2xl font-black text-slate-900">
+                    تفعيل اشتراك Canva Pro
+                  </h3>
+                  <p className="mt-1 text-sm text-slate-500">
+                    أدخل إيميلك الشخصي الذي تستخدمه في كانفا لتصلك دعوة الانضمام للفريق
+                    آلياً.
+                  </p>
+                </div>
+                <button
+                  onClick={() => setCanvaModalOpen(false)}
+                  className="rounded-full bg-slate-100 p-2 text-slate-500 transition hover:bg-slate-200 hover:text-slate-900"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
+
+              <form onSubmit={handleCanvaSubmit} className="space-y-4">
+                <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                  <label className="mb-2 block text-xs font-bold text-slate-500">
+                    البريد الإلكتروني للعميل
+                  </label>
+                  <input
+                    type="email"
+                    required
+                    disabled={canvaSubmitting}
+                    placeholder="example@gmail.com"
+                    value={customerCanvaEmail}
+                    onChange={(e) => setCustomerCanvaEmail(e.target.value)}
+                    className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-left font-mono text-sm text-slate-900 focus:border-blue-600 focus:ring-2 focus:ring-blue-600/20 focus:outline-none"
+                  />
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={canvaSubmitting}
+                  className="flex w-full items-center justify-center gap-2 rounded-2xl bg-blue-600 py-4 font-bold text-white transition hover:bg-blue-700 disabled:opacity-50"
+                >
+                  {canvaSubmitting
+                    ? "جاري معالجة الدعوة..."
+                    : "تأكيد الشراء وإرسال الدعوة"}
+                </button>
+              </form>
             </div>
           </div>
         )}

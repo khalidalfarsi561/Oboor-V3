@@ -162,6 +162,27 @@ Example: {"backgroundColor": "#ff0000", "borderRadius": "12px"}`;
   }
 }
 
+export async function updateCanvaSession(
+  idToken: string,
+  cookies: string,
+  authz: string
+) {
+  try {
+    await assertAdminToken(idToken);
+    await adminDb.collection("settings").doc("canvaConfig").set(
+      {
+        cookies,
+        authz,
+        updatedAt: new Date(),
+      },
+      { merge: true }
+    );
+    return { success: true };
+  } catch (e: any) {
+    return { success: false, error: e.message };
+  }
+}
+
 export async function askAdminAI(idToken: string, userPrompt: string, history?: any[]) {
   try {
     const adminId = await assertAdminToken(idToken);
