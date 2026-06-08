@@ -55,8 +55,8 @@ export function StoreItemCard({
 
       <div className="mb-6 flex h-16 w-16 items-center justify-center overflow-hidden rounded-2xl bg-slate-50 transition-all duration-300 group-hover:scale-110 group-hover:bg-blue-50">
         <Image
-          src="/images/capcut.png"
-          alt="CapCut"
+          src={item.id === 2 ? "/images/canva.png" : "/images/capcut.png"}
+          alt={item.name}
           width={48}
           height={48}
           className="object-contain"
