@@ -327,12 +327,11 @@ export const StoreItems = memo(function StoreItems({
             <div className="w-full max-w-md rounded-[32px] border border-white/20 bg-white p-6 shadow-2xl">
               <div className="mb-5 flex items-start justify-between gap-4">
                 <div>
-                  <h3 className="text-2xl font-black text-slate-900">
-                    تفعيل اشتراك Canva Pro
+                  <h3 className="mb-3 text-xl font-black text-slate-900">
+                    تفعيل اشتراك كانفا برو
                   </h3>
-                  <p className="mt-1 text-sm text-slate-500">
-                    أدخل إيميلك الشخصي الذي تستخدمه في كانفا لتصلك دعوة الانضمام للفريق
-                    آلياً.
+                  <p className="overflow-hidden text-[13px] text-ellipsis text-slate-500">
+                    أدخل إيميلك الذي تستخدمه في كانفا لتصلك دعوة الانضمام للفريق
                   </p>
                 </div>
                 <button
@@ -344,18 +343,18 @@ export const StoreItems = memo(function StoreItems({
               </div>
 
               <form onSubmit={handleCanvaSubmit} className="space-y-4">
-                <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-                  <label className="mb-2 block text-xs font-bold text-slate-500">
-                    البريد الإلكتروني للعميل
+                <div className="space-y-2" dir="rtl">
+                  <label className="mb-3 block text-right text-xs font-bold text-slate-500">
+                    البريد الإلكتروني
                   </label>
                   <input
                     type="email"
                     required
                     disabled={canvaSubmitting}
-                    placeholder="example@gmail.com"
+                    placeholder="أدخل إيميلك"
                     value={customerCanvaEmail}
                     onChange={(e) => setCustomerCanvaEmail(e.target.value)}
-                    className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-left font-mono text-sm text-slate-900 focus:border-blue-600 focus:ring-2 focus:ring-blue-600/20 focus:outline-none"
+                    className="mb-2 w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-right font-mono text-sm text-slate-900 focus:border-blue-600 focus:ring-2 focus:ring-blue-600/20 focus:outline-none"
                   />
                 </div>
 
@@ -364,9 +363,15 @@ export const StoreItems = memo(function StoreItems({
                   disabled={canvaSubmitting}
                   className="flex w-full items-center justify-center gap-2 rounded-2xl bg-blue-600 py-4 font-bold text-white transition hover:bg-blue-700 disabled:opacity-50"
                 >
-                  {canvaSubmitting
-                    ? "جاري معالجة الدعوة..."
-                    : "تأكيد الشراء وإرسال الدعوة"}
+                  {canvaSubmitting ? (
+                    <span className="flex items-center justify-center pt-[3px] leading-none">
+                      جاري معالجة الدعوة...
+                    </span>
+                  ) : (
+                    <span className="flex items-center justify-center pt-[3px] leading-none">
+                      تأكيد الشراء وإرسال الدعوة
+                    </span>
+                  )}
                 </button>
               </form>
             </div>
