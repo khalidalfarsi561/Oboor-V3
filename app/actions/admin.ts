@@ -340,28 +340,6 @@ export async function updateItemStock(idToken: string, itemId: number, newStock:
       newStock,
     });
 
-    if (newStock > 0) {
-      const subscriptions = await adminDb
-        .collection("stockNotifications")
-        .where("itemId", "==", itemId)
-        .get();
-
-      const batch = adminDb.batch();
-      subscriptions.docs.forEach((doc) => {
-        const userId = doc.data().userId;
-        const msgRef = adminDb.collection("userNotifications").doc();
-        batch.set(msgRef, {
-          userId,
-          message: `المنتج الذي كنت تنتظره متوفر الآن!`,
-          type: "stock_update",
-          createdAt: new Date(),
-          read: false,
-        });
-        batch.delete(doc.ref);
-      });
-      await batch.commit();
-    }
-
     return { success: true };
   } catch (e: any) {
     return { success: false, error: e.message };

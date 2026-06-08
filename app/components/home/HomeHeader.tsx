@@ -5,7 +5,6 @@ import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { Wallet, LogIn, LogOut, Gift } from "lucide-react";
 import Link from "next/link";
-import { NotificationCenter } from "../NotificationCenter";
 import { UserAvatar } from "../UserAvatar";
 import { DesignPatch, mapDesignPatchToStyle } from "../../lib/design";
 
@@ -120,7 +119,6 @@ export function HomeHeader({ user, balance, signIn, signOut, design }: HomeHeade
                   <Gift className="h-5 w-5" />
                 </Link>
               )}
-              <NotificationCenter userId={user.uid} />
 
               <div
                 className="flex h-[42px] min-w-[85px] items-center justify-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 shadow-sm"

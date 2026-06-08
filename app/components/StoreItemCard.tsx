@@ -1,11 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Loader2, Bell, BellOff } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import Image from "next/image";
 import { StoreItem } from "../lib/data";
-import { toggleStockNotification, getSubscriptionStatus } from "../actions/store";
-import { useAuth } from "./AuthProvider";
-import { toast } from "sonner";
 import { UI_MESSAGES } from "../lib/messages";
 
 interface StoreItemCardProps {
@@ -14,8 +11,6 @@ interface StoreItemCardProps {
   purchasingId: number | null;
   onBuy: (item: StoreItem) => void;
   index: number;
-  isSubscribed?: boolean;
-  onToggleNotify?: () => void;
 }
 
 export function StoreItemCard({
@@ -24,8 +19,6 @@ export function StoreItemCard({
   purchasingId,
   onBuy,
   index,
-  isSubscribed = false,
-  onToggleNotify,
 }: StoreItemCardProps) {
   const isOutOfStock = stock <= 0;
   const isPurchasing = purchasingId === item.id;
@@ -99,22 +92,10 @@ export function StoreItemCard({
 
         {isOutOfStock && (
           <button
-            onClick={onToggleNotify}
-            className={`flex w-full items-center justify-center gap-2 rounded-xl py-2.5 text-sm font-semibold transition-all hover:scale-[1.02] active:scale-95 ${
-              isSubscribed
-                ? "bg-blue-50 text-blue-600 hover:bg-blue-100"
-                : "bg-slate-50 text-slate-600 hover:bg-slate-100"
-            }`}
+            onClick={() => onBuy(item)}
+            className="flex w-full items-center justify-center gap-2 rounded-xl bg-slate-50 py-2.5 text-sm font-semibold text-slate-600 transition-all hover:bg-slate-100 active:scale-95"
           >
-            {isSubscribed ? (
-              <>
-                <BellOff className="h-4 w-4" /> {UI_MESSAGES.store.cancelNotify}
-              </>
-            ) : (
-              <>
-                <Bell className="h-4 w-4" /> {UI_MESSAGES.store.notifyMe}
-              </>
-            )}
+            💡 دليل الاستلام الفوري
           </button>
         )}
       </div>

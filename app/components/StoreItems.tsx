@@ -1,16 +1,13 @@
 "use client";
 
-import React, { useState, useEffect, memo, CSSProperties } from "react";
+import React, { useState, memo, CSSProperties } from "react";
 import { AnimatePresence } from "framer-motion";
 import { CheckCircle2, Copy, X } from "lucide-react";
 import { useAuth } from "./AuthProvider";
 import { toast } from "sonner";
 import { ITEMS, StoreItem } from "../lib/data";
-import { Package } from "lucide-react";
 import {
   purchaseItem,
-  getStockNotificationMap,
-  toggleStockNotification,
   getUserPurchases,
   processCanvaPurchase,
 } from "../actions/store";
@@ -41,40 +38,12 @@ export const StoreItems = memo(function StoreItems({
 }) {
   const { user } = useAuth();
   const [purchasingId, setPurchasingId] = useState<number | null>(null);
-  const [notificationMap, setNotificationMap] = useState<Record<number, boolean>>({});
   const [purchasedAccount, setPurchasedAccount] = useState<PurchasedAccount | null>(null);
   const [historyOpen, setHistoryOpen] = useState(false);
   const [pastPurchases, setPastPurchases] = useState<PastPurchase[]>([]);
   const [canvaModalOpen, setCanvaModalOpen] = useState(false);
   const [customerCanvaEmail, setCustomerCanvaEmail] = useState("");
   const [canvaSubmitting, setCanvaSubmitting] = useState(false);
-
-  useEffect(() => {
-    if (user) {
-      user.getIdToken().then((idToken) => {
-        getStockNotificationMap(
-          idToken,
-          ITEMS.map((it) => it.id)
-        ).then(setNotificationMap);
-      });
-    }
-  }, [user]);
-
-  const onToggleNotify = async (itemId: number) => {
-    if (!user) return;
-    try {
-      const idToken = await user.getIdToken();
-      const res = await toggleStockNotification(idToken, itemId);
-      setNotificationMap((prev) => ({ ...prev, [itemId]: !!res.subscribed }));
-      if (res.subscribed) {
-        toast.success("سنقوم بإعلامك فور توفر المنتج مرة أخرى!");
-      } else {
-        toast.info("تم إلغاء التنبيه.");
-      }
-    } catch (e: unknown) {
-      toast.error(e instanceof Error ? e.message : "حدث خطأ غير متوقع.");
-    }
-  };
 
   const fetchHistory = async () => {
     if (!user) return;
@@ -93,8 +62,15 @@ export const StoreItems = memo(function StoreItems({
   };
 
   const handleBuy = async (item: StoreItem) => {
+    // إذا كان المنتج غير متوفر، نفتح له نافذة الشرح المخصصة للمنتج بناءً على الـ ID
     if (!stockMap || (stockMap[item.id] ?? 0) <= 0) {
-      toast.error(UI_MESSAGES.store.outOfStock);
+      if (item.id === 1) {
+        // كاب كات برو: يمكنك هنا فتح نافذة منبثقة جديدة تحتوي على نص كاب كات
+        toast.info("سيتم فتح دليل استلام كاب كات برو");
+      } else if (item.id === 2) {
+        // كانفا برو
+        setCanvaModalOpen(true);
+      }
       return;
     }
     if (!user) {
@@ -207,8 +183,6 @@ export const StoreItems = memo(function StoreItems({
                   purchasingId={purchasingId}
                   onBuy={handleBuy}
                   index={i}
-                  isSubscribed={!!notificationMap[item.id]}
-                  onToggleNotify={() => onToggleNotify(item.id)}
                 />
               ))}
         </AnimatePresence>
