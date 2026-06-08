@@ -12,6 +12,7 @@ import {
   getStockNotificationMap,
   toggleStockNotification,
   getUserPurchases,
+  processCanvaPurchase,
 } from "../actions/store";
 import { StoreItemCard, StoreItemSkeleton } from "./StoreItemCard";
 import { UI_MESSAGES } from "../lib/messages";
@@ -153,20 +154,22 @@ export const StoreItems = memo(function StoreItems({
     try {
       const idToken = await user.getIdToken();
 
-      // أولاً: خصم الرصيد وتنفيذ عملية الشراء الهيكلية عبر الـ Backend الأساسي للمتجر
+      // أولاً: خصم الرصيد من محفظة العميل وتوثيق الفاتورة
       await purchaseItem(idToken, 2);
 
-      // ثانياً: استدعاء سكريبت السيرفر التلقائي لحقن الكوكيز وإرسال الدعوة إلى إيميل العميل فوراً
-      const { processCanvaPurchase } = await import("../actions/store");
-      const inviteRes = await processCanvaPurchase(idToken, customerCanvaEmail.trim());
+      // ثانياً: تسجيل التذكرة مباشرة في طابور الـ Firestore للـ VPS
+      const res = await processCanvaPurchase(idToken, customerCanvaEmail.trim());
 
-      // نجاح — processCanvaPurchase يرمي خطأ إذا فشل، ولا يعيد إلا { success: true }
-      toast.success(
-        "مبروك! نجحت العملية، تفقد بريدك الإلكتروني الآن (صندوق الوارد أو السبام) لتفعيل الاشتراك.",
-        { id: "canva-buy", duration: 8000 }
-      );
-      setCanvaModalOpen(false);
-      setCustomerCanvaEmail("");
+      if (res && res.success) {
+        toast.success(
+          "مبروك! تم حجز طلبك بنجاح، سيقوم متصفح السيرفر بتفعيل اشتراكك آلياً في أقل من دقيقة، تفقد بريدك الآن!",
+          { id: "canva-buy", duration: 8000 }
+        );
+        setCanvaModalOpen(false);
+        setCustomerCanvaEmail("");
+      } else {
+        throw new Error(res.error || "حدث خطأ أثناء حفظ تذكرة التفعيل.");
+      }
     } catch (err: any) {
       toast.error(err.message || "حدث خطأ أثناء معالجة الطلب.", { id: "canva-buy" });
     } finally {
