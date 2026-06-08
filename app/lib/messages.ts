@@ -1,8 +1,8 @@
 export const UI_MESSAGES = {
   home: {
-    heroTitle: "اربح رصيداً مجانياً يومياً",
-    heroDescStart: "تخطَ الرابط المختصر لاختبار سرعتك واحصل على كود بقيمة ",
-    heroDescEnd: " مجاناً كل 24 ساعة.",
+    heroTitle: "كيف تحصل على الرصيد ؟",
+    heroDescStart: "تخطَ الرابط المختصر واحصل على كود بقيمة ",
+    heroDescEnd: " على كل عملية تخطي ناجحة لأستخدامه لشراء المنتجات في الاسفل",
     heroButton: "احصل على الكود الآن",
     claimTitle: "هل لديك كود سري ؟",
     claimDesc:
