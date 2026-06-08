@@ -46,7 +46,7 @@ export function StoreItemCard({
             {UI_MESSAGES.store.notAvailable}
           </span>
         ) : (
-          <span className="rounded-full border border-blue-100 bg-blue-50 px-3 py-1 text-xs font-bold text-blue-600">
+          <span className="flex items-center justify-center rounded-full border border-blue-100 bg-blue-50 px-3 py-1 pt-[6px] pb-[3px] text-xs leading-none font-bold text-blue-600">
             {UI_MESSAGES.store.remaining}
             {stock}
           </span>
@@ -85,11 +85,15 @@ export function StoreItemCard({
           }`}
         >
           {isOutOfStock ? (
-            UI_MESSAGES.store.soldOut
+            <span className="flex items-center justify-center pt-[3px] leading-none">
+              {UI_MESSAGES.store.soldOut}
+            </span>
           ) : isPurchasing ? (
             <Loader2 className="h-5 w-5 animate-spin" />
           ) : (
-            UI_MESSAGES.store.buyNow
+            <span className="flex items-center justify-center pt-[3px] leading-none">
+              {UI_MESSAGES.store.buyNow}
+            </span>
           )}
         </button>
 
