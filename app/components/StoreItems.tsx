@@ -293,37 +293,132 @@ export const StoreItems = memo(function StoreItems({
       <AnimatePresence>
         {capcutModalOpen && (
           <div className="fixed inset-0 z-[999] flex items-center justify-center bg-slate-950/60 p-4 backdrop-blur-sm">
-            <div className="w-full max-w-md rounded-[32px] border border-white/20 bg-white p-6 shadow-2xl text-right" dir="rtl">
-              <div className="mb-5 flex items-start justify-between gap-4">
+            <div
+              className="scrollbar-hide max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-[32px] border border-white/20 bg-white p-6 text-right shadow-2xl"
+              dir="rtl"
+            >
+              {/* الرأس وإغلاق النافذة */}
+              <div className="mb-5 flex items-start justify-between gap-4 border-b border-slate-100 pb-4">
                 <div>
-                  <h3 className="text-xl font-black text-slate-900">✨ دليل استلام كاب كات برو (7 أيام)</h3>
-                  <p className="mt-1 text-xs text-slate-500">تفاصيل المنتج وآلية الاستلام الفوري بعد الشراء</p>
+                  <h3 className="pt-2 text-xl font-black text-slate-900">
+                    دليل منتج كاب كات برو
+                  </h3>
                 </div>
-                <button onClick={() => setCapcutModalOpen(false)} className="rounded-full bg-slate-100 p-2 text-slate-500 transition hover:bg-slate-200">
+                <button
+                  onClick={() => setCapcutModalOpen(false)}
+                  className="rounded-full bg-slate-100 p-2 text-slate-500 transition hover:bg-slate-200"
+                >
                   <X className="h-5 w-5" />
                 </button>
               </div>
 
-              <div className="space-y-4 text-sm leading-relaxed text-slate-600">
-                <div className="rounded-2xl bg-slate-50 p-4 border border-slate-100">
-                  <p className="font-bold text-slate-800 mb-1">🎁 ماذا ستحصل عليه؟</p>
-                  <ul className="list-disc list-inside space-y-1 text-xs text-slate-500 pr-2">
-                    <li>الوصول الكامل لميزات البرو (الفلاتر، الانتقالات، والتأثيرات المدفوعة).</li>
-                    <li>أدوات تعديل الصوت وتحسين الجودة المتقدمة بالذكاء الاصطناعي.</li>
-                    <li>إزالة العلامة المائية وتصدير الفيديوهات بدقة عادية وعالية تصل إلى 4K.</li>
+              {/* النص الكامل المضمن بدون اختصار */}
+              <div className="space-y-6 text-sm leading-relaxed text-slate-700">
+                <p className="text-[13px] font-medium text-slate-800">
+                  يسعدنا اختيارك لمتجرنا لتطوير مهاراتك في المونتاج وصناعة المحتوى، إليك
+                  تفاصيل كاملة وواضحة حول ما ستحصل عليه عند شراء كاب كات برو والخطوات
+                  لاستلام حسابك والبدء فوراً :
+                </p>
+
+                {/* الميزات */}
+                <div className="space-y-3 rounded-2xl border border-slate-100 bg-slate-50 p-5">
+                  <h4 className="flex items-center gap-2 font-black text-slate-900">
+                    أولاً : ماذا ستحصل عليه عند الشراء ؟
+                  </h4>
+                  <p className="text-xs leading-[18px] text-slate-600">
+                    عند إتمام عملية الشراء ستحصل على حساب كامل وجاهز (بريد إلكتروني وكلمة
+                    مرور) مفعل عليه اشتراك البرو وهذا الحساب يمنحك الصلاحيات التالية :
+                  </p>
+                  <ul className="list-none space-y-4 pr-2 text-xs leading-[18px] text-slate-600">
+                    <li>
+                      <strong className="text-slate-900">
+                        ✦ الوصول الكامل لميزات البرو :
+                      </strong>{" "}
+                      استخدام كافة الفلاتر والانتقالات والتأثيرات والملصقات المدفوعة
+                      والمحصورة لمشتركي البرو فقط
+                    </li>
+                    <li>
+                      <strong className="text-slate-900">✦ الذكاء الاصطناعي :</strong>{" "}
+                      الاستفادة من أدوات تعديل الصوت وتحسين جودة الفيديو المتقدمة المعتمدة
+                      على الذكاء الاصطناعي وغيرها الكثير
+                    </li>
+                    <li>
+                      <strong className="text-slate-900">
+                        ✦ إزالة العلامة المائية وتصدير عالي الدقة :
+                      </strong>{" "}
+                      ستتمكن من حفظ فيديوهاتك بدقة تصل إلى 4K وبمعدل إطارات مرتفع
+                    </li>
+                    <li>
+                      <strong className="text-slate-900">✦ مساحة تخزين سحابية :</strong>{" "}
+                      مساحة إضافية لحفظ مشاريعك والوصول إليها من أي جهاز.
+                    </li>
                   </ul>
                 </div>
 
-                <div className="rounded-2xl bg-blue-50/50 p-4 border border-blue-100/50">
-                  <p className="font-bold text-blue-800 mb-1">📦 كيف ستستلم الحساب؟</p>
-                  <p className="text-xs text-blue-700">
-                    النظام لدينا مبرمج آلياً وفورياً! بمجرد شحن رصيدك والضغط على &ldquo;شراء الآن&rdquo;، ستظهر لك نافذة فورية على الشاشة تحتوي على (البريد الإلكتروني وكلمة المرور) مع زر لنسخ البيانات بضغطة واحدة لتسجيل الدخول في تطبيقك مباشرة.
+                {/* خطوات الاستلام */}
+                <div className="space-y-3 rounded-2xl border border-blue-100/50 bg-blue-50/40 p-5">
+                  <h4 className="flex items-center gap-2 font-black text-blue-900">
+                    ثانياً : كيف ستستلم الحساب ؟
+                  </h4>
+                  <p className="text-xs leading-[18px] text-blue-800">
+                    النظام لدينا مبرمج بالكامل ليعمل بشكل آلي وفوري، لن تحتاج لانتظار
+                    الدعم الفني ليرسل لك البيانات، بل ستظهر لك فوراً كالتالي:
                   </p>
+                  <ul className="list-none space-y-4 pr-2 text-xs leading-[18px] text-slate-600">
+                    <li>
+                      <strong className="mb-2 block leading-[18px] text-blue-900">
+                        ✦ ظهور بيانات الحساب مباشرة :
+                      </strong>
+                      بمجرد الضغط على زر &ldquo;شراء الآن&rdquo; وإتمام الخصم من رصيدك
+                      بنجاح، ستنبثق لك نافذة على الشاشة تحتوي على :
+                      <div className="mt-1.5 flex flex-col gap-1 rounded-xl border border-blue-100 bg-white p-2.5 text-center font-mono text-[11px] font-bold text-blue-600">
+                        <div>البريد الإلكتروني (EMAIL)</div>
+                        <div>كلمة المرور (PASSWORD)</div>
+                      </div>
+                    </li>
+                    <li>
+                      <strong className="mb-2 block leading-[18px] text-blue-900">
+                        ✦ نسخ البيانات بضغطة زر :
+                      </strong>
+                      ستجد أسفل النافذة زراً مكتوباً عليه &ldquo;نسخ بيانات الحساب&rdquo;،
+                      اضغط عليه ليتم نسخ الإيميل والباسورد معاً إلى حافظة جهازك بسهولة دون
+                      الحاجة لكتابتها يدوياً.
+                    </li>
+                    <li>
+                      <strong className="mb-2 block text-blue-900">
+                        ✦ تسجيل الدخول في تطبيق كاب كات :
+                      </strong>
+                      افتح تطبيق كاب كات على (هاتفك، جهاز الكمبيوتر، أو المتصفح)، واضغط
+                      على تسجيل الدخول (Sign in)، ثم اختر تسجيل الدخول عبر البريد
+                      الإلكتروني وادخل البيانات التي استلمتها منا.
+                    </li>
+                    <li>
+                      <strong className="mb-2 block text-blue-900">
+                        ✦ أين تجد حسابك إذا أغلقت النافذة بالخطأ ؟
+                      </strong>
+                      لا تقلق أبداً، إذا قمت بإغلاق النافذة المنبثقة يمكنك دائماً مراجعة
+                      حساباتك المشتراة من خلال الضغط على زر &ldquo;سجل مشترياتي&rdquo;
+                      الموجود في أعلى قسم المنتجات بالصفحة الرئيسية وستظهر لك قائمة بكل
+                      الحسابات التي اشتريتها سابقاً مع إيميلاتها وكلمات المرور الخاصة بها
+                      في أي وقت
+                    </li>
+                  </ul>
                 </div>
+
+                {/* التنويه الذكي */}
+                <p className="rounded-2xl border border-amber-100 bg-amber-50 p-4 text-xs text-amber-700">
+                  <strong>تنويه :</strong> الحساب المستلم مخصص للاستخدام الشخصي خلال فترة
+                  الـ 7 أيام وتأكد دائماً من تسجيل الدخول بنفس البيانات المستلمة للاستمتاع
+                  بكافة خصائص البرو المذهلة
+                </p>
               </div>
 
-              <button onClick={() => setCapcutModalOpen(false)} className="mt-5 w-full rounded-2xl bg-slate-900 py-3.5 font-bold text-white transition hover:bg-slate-800">
-                فهمت ذلك
+              {/* زر الإغلاق السفلي */}
+              <button
+                onClick={() => setCapcutModalOpen(false)}
+                className="mt-5 w-full rounded-2xl bg-slate-900 py-3.5 font-bold text-white transition hover:bg-slate-800"
+              >
+                حسناً، فهمت ذلك
               </button>
             </div>
           </div>
@@ -334,20 +429,30 @@ export const StoreItems = memo(function StoreItems({
       <AnimatePresence>
         {canvaModalOpen && (
           <div className="fixed inset-0 z-[999] flex items-center justify-center bg-slate-950/60 p-4 backdrop-blur-sm">
-            <div className="w-full max-w-md rounded-[32px] border border-white/20 bg-white p-6 shadow-2xl text-right" dir="rtl">
+            <div
+              className="w-full max-w-md rounded-[32px] border border-white/20 bg-white p-6 text-right shadow-2xl"
+              dir="rtl"
+            >
               <div className="mb-5 flex items-start justify-between gap-4">
                 <div>
-                  <h3 className="text-xl font-black text-slate-900">🎨 تفعيل اشتراك كانفا برو (30 يوم)</h3>
-                  <p className="mt-1 text-xs text-slate-500">سيتم ترقية حسابك الشخصي الحالي دون فقدان تصاميمك</p>
+                  <h3 className="text-xl font-black text-slate-900">
+                    🎨 تفعيل اشتراك كانفا برو (30 يوم)
+                  </h3>
+                  <p className="mt-1 text-xs text-slate-500">
+                    سيتم ترقية حسابك الشخصي الحالي دون فقدان تصاميمك
+                  </p>
                 </div>
-                <button onClick={() => setCanvaModalOpen(false)} className="rounded-full bg-slate-100 p-2 text-slate-500 transition hover:bg-slate-200">
+                <button
+                  onClick={() => setCanvaModalOpen(false)}
+                  className="rounded-full bg-slate-100 p-2 text-slate-500 transition hover:bg-slate-200"
+                >
                   <X className="h-5 w-5" />
                 </button>
               </div>
 
               {/* الشرح للمشتري */}
-              <div className="mb-4 rounded-2xl bg-purple-50/50 p-4 border border-purple-100/50 text-xs text-purple-800 leading-relaxed">
-                <p className="font-bold mb-1">✨ مميزات التفعيل على حسابك الشخصي:</p>
+              <div className="mb-4 rounded-2xl border border-purple-100/50 bg-purple-50/50 p-4 text-xs leading-relaxed text-purple-800">
+                <p className="mb-1 font-bold">✨ مميزات التفعيل على حسابك الشخصي:</p>
                 <li>الوصول لأكثر من 100 مليون قالب وعنصر وصورة مدفوعة.</li>
                 <li>أداة إزالة الخلفيات الذكية وتغيير حجم التصاميم بضغطة زر.</li>
                 <li>تنزيل التصاميم بأعلى جودة وخلفية شفافة تماماً للطباعة.</li>
@@ -355,7 +460,9 @@ export const StoreItems = memo(function StoreItems({
 
               <form onSubmit={handleCanvaSubmit} className="space-y-4">
                 <div className="space-y-2">
-                  <label className="block text-xs font-bold text-slate-500">البريد الإلكتروني لحسابك في كانفا:</label>
+                  <label className="block text-xs font-bold text-slate-500">
+                    البريد الإلكتروني لحسابك في كانفا:
+                  </label>
                   <input
                     type="email"
                     required
@@ -365,11 +472,21 @@ export const StoreItems = memo(function StoreItems({
                     onChange={(e) => setCustomerCanvaEmail(e.target.value)}
                     className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-left font-mono text-sm text-slate-900 focus:border-blue-600 focus:ring-2 focus:ring-blue-600/20 focus:outline-none"
                   />
-                  <p className="text-[11px] text-slate-400 italic">💡 بعد التأكيد، تفقد بريدك الإلكتروني (صندوق الوارد أو الرسائل الترويجية) لتجد دعوة رسمية من Canva، اضغط &ldquo;قبول الدعوة&rdquo; لتفعيل البرو فوراً.</p>
+                  <p className="text-[11px] text-slate-400 italic">
+                    💡 بعد التأكيد، تفقد بريدك الإلكتروني (صندوق الوارد أو الرسائل
+                    الترويجية) لتجد دعوة رسمية من Canva، اضغط &ldquo;قبول الدعوة&rdquo;
+                    لتفعيل البرو فوراً.
+                  </p>
                 </div>
 
-                <button type="submit" disabled={canvaSubmitting} className="flex w-full items-center justify-center gap-2 rounded-2xl bg-blue-600 py-4 font-bold text-white transition hover:bg-blue-700 disabled:opacity-50">
-                  {canvaSubmitting ? "جاري معالجة الدعوة..." : "تأكيد الشراء وإرسال الدعوة الآلية"}
+                <button
+                  type="submit"
+                  disabled={canvaSubmitting}
+                  className="flex w-full items-center justify-center gap-2 rounded-2xl bg-blue-600 py-4 font-bold text-white transition hover:bg-blue-700 disabled:opacity-50"
+                >
+                  {canvaSubmitting
+                    ? "جاري معالجة الدعوة..."
+                    : "تأكيد الشراء وإرسال الدعوة الآلية"}
                 </button>
               </form>
             </div>
