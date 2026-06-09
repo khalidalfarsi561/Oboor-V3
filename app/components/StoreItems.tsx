@@ -435,10 +435,10 @@ export const StoreItems = memo(function StoreItems({
             >
               <div className="mb-5 flex items-start justify-between gap-4">
                 <div>
-                  <h3 className="text-xl font-black text-slate-900">
-                    🎨 تفعيل اشتراك كانفا برو (30 يوم)
+                  <h3 className="mt-1.5 text-xl font-black text-slate-900">
+                    تفعيل اشتراك كانفا برو
                   </h3>
-                  <p className="mt-1 text-xs text-slate-500">
+                  <p className="mt-1.5 text-xs text-[10px] whitespace-nowrap text-slate-500">
                     سيتم ترقية حسابك الشخصي الحالي دون فقدان تصاميمك
                   </p>
                 </div>
@@ -452,7 +452,7 @@ export const StoreItems = memo(function StoreItems({
 
               {/* الشرح للمشتري */}
               <div className="mb-4 rounded-2xl border border-purple-100/50 bg-purple-50/50 p-4 text-xs leading-relaxed text-purple-800">
-                <p className="mb-1 font-bold">✨ مميزات التفعيل على حسابك الشخصي:</p>
+                <p className="mb-1 font-bold"> مميزات التفعيل على حسابك الشخصي:</p>
                 <li>الوصول لأكثر من 100 مليون قالب وعنصر وصورة مدفوعة.</li>
                 <li>أداة إزالة الخلفيات الذكية وتغيير حجم التصاميم بضغطة زر.</li>
                 <li>تنزيل التصاميم بأعلى جودة وخلفية شفافة تماماً للطباعة.</li>
@@ -461,21 +461,21 @@ export const StoreItems = memo(function StoreItems({
               <form onSubmit={handleCanvaSubmit} className="space-y-4">
                 <div className="space-y-2">
                   <label className="block text-xs font-bold text-slate-500">
-                    البريد الإلكتروني لحسابك في كانفا:
+                    البريد الإلكتروني لحسابك في كانفا :
                   </label>
                   <input
                     type="email"
                     required
                     disabled={canvaSubmitting}
-                    placeholder="example@gmail.com"
+                    placeholder="أدخل إيميلك"
                     value={customerCanvaEmail}
                     onChange={(e) => setCustomerCanvaEmail(e.target.value)}
-                    className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-left font-mono text-sm text-slate-900 focus:border-blue-600 focus:ring-2 focus:ring-blue-600/20 focus:outline-none"
+                    className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-right font-mono text-sm text-slate-900 focus:border-blue-600 focus:ring-2 focus:ring-blue-600/20 focus:outline-none"
                   />
-                  <p className="text-[11px] text-slate-400 italic">
-                    💡 بعد التأكيد، تفقد بريدك الإلكتروني (صندوق الوارد أو الرسائل
-                    الترويجية) لتجد دعوة رسمية من Canva، اضغط &ldquo;قبول الدعوة&rdquo;
-                    لتفعيل البرو فوراً.
+                  <p className="mt-1 text-[11px] text-slate-400">
+                    بعد التأكيد تفقد بريدك الإلكتروني (صندوق الوارد أو الرسائل الترويجية)
+                    لتجد دعوة رسمية من كانفا، اضغط &ldquo;قبول الدعوة&rdquo;لتفعيل البرو
+                    فوراً
                   </p>
                 </div>
 
