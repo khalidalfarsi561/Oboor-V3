@@ -95,7 +95,7 @@ export function StoreItemCard({
             onClick={() => onBuy(item)}
             className="flex w-full items-center justify-center gap-2 rounded-xl bg-slate-50 py-2.5 text-sm font-semibold text-slate-600 transition-all hover:bg-slate-100 active:scale-95"
           >
-            💡 دليل الاستلام الفوري
+             دليل الاستلام
           </button>
         )}
       </div>

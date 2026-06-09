@@ -6,11 +6,7 @@ import { CheckCircle2, Copy, X } from "lucide-react";
 import { useAuth } from "./AuthProvider";
 import { toast } from "sonner";
 import { ITEMS, StoreItem } from "../lib/data";
-import {
-  purchaseItem,
-  getUserPurchases,
-  processCanvaPurchase,
-} from "../actions/store";
+import { purchaseItem, getUserPurchases, processCanvaPurchase } from "../actions/store";
 import { StoreItemCard, StoreItemSkeleton } from "./StoreItemCard";
 import { UI_MESSAGES } from "../lib/messages";
 
@@ -42,6 +38,7 @@ export const StoreItems = memo(function StoreItems({
   const [historyOpen, setHistoryOpen] = useState(false);
   const [pastPurchases, setPastPurchases] = useState<PastPurchase[]>([]);
   const [canvaModalOpen, setCanvaModalOpen] = useState(false);
+  const [capcutModalOpen, setCapcutModalOpen] = useState(false);
   const [customerCanvaEmail, setCustomerCanvaEmail] = useState("");
   const [canvaSubmitting, setCanvaSubmitting] = useState(false);
 
@@ -62,13 +59,11 @@ export const StoreItems = memo(function StoreItems({
   };
 
   const handleBuy = async (item: StoreItem) => {
-    // إذا كان المنتج غير متوفر، نفتح له نافذة الشرح المخصصة للمنتج بناءً على الـ ID
+    // إذا كان المنتج غير متوفر أو ضغط على الدليل، نفتح النافذة الإرشادية بناءً على الـ ID
     if (!stockMap || (stockMap[item.id] ?? 0) <= 0) {
       if (item.id === 1) {
-        // كاب كات برو: يمكنك هنا فتح نافذة منبثقة جديدة تحتوي على نص كاب كات
-        toast.info("سيتم فتح دليل استلام كاب كات برو");
+        setCapcutModalOpen(true);
       } else if (item.id === 2) {
-        // كانفا برو
         setCanvaModalOpen(true);
       }
       return;
@@ -294,58 +289,87 @@ export const StoreItems = memo(function StoreItems({
         )}
       </AnimatePresence>
 
-      {/* نافذة طلب إيميل كانفا التلقائي */}
+      {/* 🎬 نافذة دليل استلام كاب كات برو */}
       <AnimatePresence>
-        {canvaModalOpen && (
+        {capcutModalOpen && (
           <div className="fixed inset-0 z-[999] flex items-center justify-center bg-slate-950/60 p-4 backdrop-blur-sm">
-            <div className="w-full max-w-md rounded-[32px] border border-white/20 bg-white p-6 shadow-2xl">
+            <div className="w-full max-w-md rounded-[32px] border border-white/20 bg-white p-6 shadow-2xl text-right" dir="rtl">
               <div className="mb-5 flex items-start justify-between gap-4">
                 <div>
-                  <h3 className="mb-3 text-xl font-black text-slate-900">
-                    تفعيل اشتراك كانفا برو
-                  </h3>
-                  <p className="overflow-hidden text-[13px] text-ellipsis text-slate-500">
-                    أدخل إيميلك الذي تستخدمه في كانفا لتصلك دعوة الانضمام للفريق
-                  </p>
+                  <h3 className="text-xl font-black text-slate-900">✨ دليل استلام كاب كات برو (7 أيام)</h3>
+                  <p className="mt-1 text-xs text-slate-500">تفاصيل المنتج وآلية الاستلام الفوري بعد الشراء</p>
                 </div>
-                <button
-                  onClick={() => setCanvaModalOpen(false)}
-                  className="rounded-full bg-slate-100 p-2 text-slate-500 transition hover:bg-slate-200 hover:text-slate-900"
-                >
+                <button onClick={() => setCapcutModalOpen(false)} className="rounded-full bg-slate-100 p-2 text-slate-500 transition hover:bg-slate-200">
                   <X className="h-5 w-5" />
                 </button>
               </div>
 
+              <div className="space-y-4 text-sm leading-relaxed text-slate-600">
+                <div className="rounded-2xl bg-slate-50 p-4 border border-slate-100">
+                  <p className="font-bold text-slate-800 mb-1">🎁 ماذا ستحصل عليه؟</p>
+                  <ul className="list-disc list-inside space-y-1 text-xs text-slate-500 pr-2">
+                    <li>الوصول الكامل لميزات البرو (الفلاتر، الانتقالات، والتأثيرات المدفوعة).</li>
+                    <li>أدوات تعديل الصوت وتحسين الجودة المتقدمة بالذكاء الاصطناعي.</li>
+                    <li>إزالة العلامة المائية وتصدير الفيديوهات بدقة عادية وعالية تصل إلى 4K.</li>
+                  </ul>
+                </div>
+
+                <div className="rounded-2xl bg-blue-50/50 p-4 border border-blue-100/50">
+                  <p className="font-bold text-blue-800 mb-1">📦 كيف ستستلم الحساب؟</p>
+                  <p className="text-xs text-blue-700">
+                    النظام لدينا مبرمج آلياً وفورياً! بمجرد شحن رصيدك والضغط على &ldquo;شراء الآن&rdquo;، ستظهر لك نافذة فورية على الشاشة تحتوي على (البريد الإلكتروني وكلمة المرور) مع زر لنسخ البيانات بضغطة واحدة لتسجيل الدخول في تطبيقك مباشرة.
+                  </p>
+                </div>
+              </div>
+
+              <button onClick={() => setCapcutModalOpen(false)} className="mt-5 w-full rounded-2xl bg-slate-900 py-3.5 font-bold text-white transition hover:bg-slate-800">
+                فهمت ذلك
+              </button>
+            </div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* 🎨 نافذة طلب إيميل ودليل كانفا برو */}
+      <AnimatePresence>
+        {canvaModalOpen && (
+          <div className="fixed inset-0 z-[999] flex items-center justify-center bg-slate-950/60 p-4 backdrop-blur-sm">
+            <div className="w-full max-w-md rounded-[32px] border border-white/20 bg-white p-6 shadow-2xl text-right" dir="rtl">
+              <div className="mb-5 flex items-start justify-between gap-4">
+                <div>
+                  <h3 className="text-xl font-black text-slate-900">🎨 تفعيل اشتراك كانفا برو (30 يوم)</h3>
+                  <p className="mt-1 text-xs text-slate-500">سيتم ترقية حسابك الشخصي الحالي دون فقدان تصاميمك</p>
+                </div>
+                <button onClick={() => setCanvaModalOpen(false)} className="rounded-full bg-slate-100 p-2 text-slate-500 transition hover:bg-slate-200">
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
+
+              {/* الشرح للمشتري */}
+              <div className="mb-4 rounded-2xl bg-purple-50/50 p-4 border border-purple-100/50 text-xs text-purple-800 leading-relaxed">
+                <p className="font-bold mb-1">✨ مميزات التفعيل على حسابك الشخصي:</p>
+                <li>الوصول لأكثر من 100 مليون قالب وعنصر وصورة مدفوعة.</li>
+                <li>أداة إزالة الخلفيات الذكية وتغيير حجم التصاميم بضغطة زر.</li>
+                <li>تنزيل التصاميم بأعلى جودة وخلفية شفافة تماماً للطباعة.</li>
+              </div>
+
               <form onSubmit={handleCanvaSubmit} className="space-y-4">
-                <div className="space-y-2" dir="rtl">
-                  <label className="mb-3 block text-right text-xs font-bold text-slate-500">
-                    البريد الإلكتروني
-                  </label>
+                <div className="space-y-2">
+                  <label className="block text-xs font-bold text-slate-500">البريد الإلكتروني لحسابك في كانفا:</label>
                   <input
                     type="email"
                     required
                     disabled={canvaSubmitting}
-                    placeholder="أدخل إيميلك"
+                    placeholder="example@gmail.com"
                     value={customerCanvaEmail}
                     onChange={(e) => setCustomerCanvaEmail(e.target.value)}
-                    className="mb-2 w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-right font-mono text-sm text-slate-900 focus:border-blue-600 focus:ring-2 focus:ring-blue-600/20 focus:outline-none"
+                    className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-left font-mono text-sm text-slate-900 focus:border-blue-600 focus:ring-2 focus:ring-blue-600/20 focus:outline-none"
                   />
+                  <p className="text-[11px] text-slate-400 italic">💡 بعد التأكيد، تفقد بريدك الإلكتروني (صندوق الوارد أو الرسائل الترويجية) لتجد دعوة رسمية من Canva، اضغط &ldquo;قبول الدعوة&rdquo; لتفعيل البرو فوراً.</p>
                 </div>
 
-                <button
-                  type="submit"
-                  disabled={canvaSubmitting}
-                  className="flex w-full items-center justify-center gap-2 rounded-2xl bg-blue-600 py-4 font-bold text-white transition hover:bg-blue-700 disabled:opacity-50"
-                >
-                  {canvaSubmitting ? (
-                    <span className="flex items-center justify-center pt-[3px] leading-none">
-                      جاري معالجة الدعوة...
-                    </span>
-                  ) : (
-                    <span className="flex items-center justify-center pt-[3px] leading-none">
-                      تأكيد الشراء وإرسال الدعوة
-                    </span>
-                  )}
+                <button type="submit" disabled={canvaSubmitting} className="flex w-full items-center justify-center gap-2 rounded-2xl bg-blue-600 py-4 font-bold text-white transition hover:bg-blue-700 disabled:opacity-50">
+                  {canvaSubmitting ? "جاري معالجة الدعوة..." : "تأكيد الشراء وإرسال الدعوة الآلية"}
                 </button>
               </form>
             </div>
