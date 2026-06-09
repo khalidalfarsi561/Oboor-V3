@@ -1,6 +1,6 @@
 "use server";
 
-import { adminDb, adminAuth } from "../lib/firebase/admin";
+import { adminDb, getUidFromToken } from "../lib/firebase/admin";
 import { assertRateLimit } from "../lib/rate-limit";
 import { FieldValue } from "firebase-admin/firestore";
 import { headers, cookies } from "next/headers";
@@ -106,12 +106,6 @@ async function detectVPN(): Promise<boolean> {
     // في حال حدوث أي مشكلة في الـ API الخارجي، نمرر المستخدم فوراً لضمان استمرارية عمل الموقع وسرعته
     return false;
   }
-}
-
-async function getUidFromToken(idToken: string): Promise<string> {
-  if (!idToken) throw new Error("غير مصرح.");
-  const decoded = await adminAuth.verifyIdToken(idToken);
-  return decoded.uid;
 }
 
 export async function initiateClaimIntent(
@@ -247,9 +241,8 @@ export async function generateRewardCode(
       const randomCode = generateRandomCode();
       const codeRef = adminDb.collection("rewardCodes").doc(randomCode);
 
-      // نضع الفحص هنا مباشرة، ونادراً جداً ما سيتكرر كود عشوائي مكون من 8 رموز في نفس أجزاء الملي ثانية
-
-      transaction.set(codeRef!, {
+      // إزالة علامة التعجب لأن النوع مدعوم تلقائياً ومضمون
+      transaction.set(codeRef, {
         code: randomCode,
         amount: 1,
         isUsed: false,

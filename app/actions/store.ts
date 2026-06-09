@@ -1,28 +1,22 @@
 "use server";
 
-import { adminDb, adminAuth } from "../lib/firebase/admin";
+import { adminDb, getUidFromToken } from "../lib/firebase/admin";
 import { FieldValue } from "firebase-admin/firestore";
-import { ITEMS_MAP } from "../lib/data";
-
-async function getUidFromToken(idToken: string): Promise<string> {
-  if (!idToken) throw new Error("غير مصرح.");
-  const decoded = await adminAuth.verifyIdToken(idToken);
-  return decoded.uid;
-}
+import { ITEMS_MAP, PRODUCT_IDS } from "../lib/data";
 
 export async function getStoreStock() {
   try {
-    // 1. جلب مخزون كاب كات (المنتج 1) من كولكشن الحسابات المتاحة
+    // 1. جلب مخزون كاب كات من كولكشن الحسابات المتاحة
     const capcutSnap = await adminDb
       .collection("capcutAccounts")
       .where("status", "==", "available")
       .count()
       .get();
 
-    // 2. جلب مخزون كانفا (المنتج 2) من كولكشن storeItems
+    // 2. جلب مخزون كانفا بطلب آمن
     const canvaStockDoc = await adminDb
       .collection("storeItems")
-      .where("itemId", "==", 2)
+      .where("itemId", "==", PRODUCT_IDS.CANVA)
       .limit(1)
       .get();
 
@@ -33,12 +27,12 @@ export async function getStoreStock() {
 
     // إرجاع خريطة المخزون للمنتجين معاً ديناميكياً
     return {
-      1: capcutSnap.data().count,
-      2: canvaStock,
+      [PRODUCT_IDS.CAPCUT]: capcutSnap.data().count,
+      [PRODUCT_IDS.CANVA]: canvaStock,
     };
   } catch (err) {
-    console.warn("Failed to fetch inventory map:", err);
-    return { 1: 0, 2: 0 };
+    console.error("Failed to fetch inventory map:", err);
+    throw new Error("عذراً، فشل في جلب بيانات المخزون من السيرفر.");
   }
 }
 
@@ -65,11 +59,11 @@ export async function purchaseItem(idToken: string, itemId: number) {
       throw new Error("رصيد غير كافٍ.");
     }
 
-    // 🔵 منتج كانفا (id: 2) — يعتمد على المخزون الوهمي وإرسال دعوة، بدون حسابات جاهزة
-    if (itemId === 2) {
+    // 🔵 منتج كانفا — يعتمد على المخزون الوهمي وإرسال دعوة، بدون حسابات جاهزة
+    if (itemId === PRODUCT_IDS.CANVA) {
       const canvaStockQuery = adminDb
         .collection("storeItems")
-        .where("itemId", "==", 2)
+        .where("itemId", "==", PRODUCT_IDS.CANVA)
         .limit(1);
       const canvaStockSnap = await transaction.get(canvaStockQuery);
 
@@ -104,7 +98,7 @@ export async function purchaseItem(idToken: string, itemId: number) {
       };
     }
 
-    // 🔵 المنتجات الأخرى (مثل كاب كات id: 1) — تسحب حساباً جاهزاً من capcutAccounts
+    // 🔵 المنتجات الأخرى (مثل كاب كات) — تسحب حساباً جاهزاً من capcutAccounts
     const accountQuery = adminDb
       .collection("capcutAccounts")
       .where("status", "==", "available")
@@ -207,7 +201,7 @@ export async function getUserPurchases(idToken: string) {
     const snap = await adminDb
       .collection("purchases")
       .where("userId", "==", userId)
-      .where("itemId", "==", 1) // 🔥 هنا المكان الصحيح لحجب كانفا (رقم 2) من سجل مشتريات العميل
+      .where("itemId", "==", PRODUCT_IDS.CAPCUT)
       .orderBy("createdAt", "desc")
       .get();
 
@@ -278,7 +272,7 @@ export async function processCanvaPurchase(idToken: string, userEmail: string) {
     const purchasesSnap = await adminDb
       .collection("purchases")
       .where("userId", "==", userId)
-      .where("itemId", "==", 2)
+      .where("itemId", "==", PRODUCT_IDS.CANVA)
       .orderBy("createdAt", "desc")
       .limit(1)
       .get();

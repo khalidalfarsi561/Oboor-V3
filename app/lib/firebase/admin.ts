@@ -185,4 +185,10 @@ if (!admin.apps.length) {
   adminAuth = admin.auth();
 }
 
+export async function getUidFromToken(idToken: string): Promise<string> {
+  if (!idToken) throw new Error("غير مصرح.");
+  const decoded = await adminAuth.verifyIdToken(idToken);
+  return decoded.uid;
+}
+
 export { adminDb, adminAuth };
