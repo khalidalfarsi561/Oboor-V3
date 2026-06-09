@@ -450,14 +450,6 @@ export const StoreItems = memo(function StoreItems({
                 </button>
               </div>
 
-              {/* الشرح للمشتري */}
-              <div className="mb-4 rounded-2xl border border-purple-100/50 bg-purple-50/50 p-4 text-xs leading-relaxed text-purple-800">
-                <p className="mb-1 font-bold"> مميزات التفعيل على حسابك الشخصي:</p>
-                <li>الوصول لأكثر من 100 مليون قالب وعنصر وصورة مدفوعة.</li>
-                <li>أداة إزالة الخلفيات الذكية وتغيير حجم التصاميم بضغطة زر.</li>
-                <li>تنزيل التصاميم بأعلى جودة وخلفية شفافة تماماً للطباعة.</li>
-              </div>
-
               <form onSubmit={handleCanvaSubmit} className="space-y-4">
                 <div className="space-y-2">
                   <label className="block text-xs font-bold text-slate-500">
@@ -484,9 +476,15 @@ export const StoreItems = memo(function StoreItems({
                   disabled={canvaSubmitting}
                   className="flex w-full items-center justify-center gap-2 rounded-2xl bg-blue-600 py-4 font-bold text-white transition hover:bg-blue-700 disabled:opacity-50"
                 >
-                  {canvaSubmitting
-                    ? "جاري معالجة الدعوة..."
-                    : "تأكيد الشراء وإرسال الدعوة الآلية"}
+                  {canvaSubmitting ? (
+                    <span className="flex items-center justify-center pt-[3px] leading-none">
+                      جاري معالجة الدعوة...
+                    </span>
+                  ) : (
+                    <span className="flex items-center justify-center pt-[3px] leading-none">
+                      تأكيد الشراء وإرسال الدعوة
+                    </span>
+                  )}
                 </button>
               </form>
             </div>
