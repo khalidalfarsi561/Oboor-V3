@@ -207,6 +207,7 @@ export async function getUserPurchases(idToken: string) {
     const snap = await adminDb
       .collection("purchases")
       .where("userId", "==", userId)
+      .where("itemId", "==", 1) // 🔥 هنا المكان الصحيح لحجب كانفا (رقم 2) من سجل مشتريات العميل
       .orderBy("createdAt", "desc")
       .get();
 
@@ -214,15 +215,33 @@ export async function getUserPurchases(idToken: string) {
       return { success: true, purchases: [] };
     }
 
-    // 1. استخراج جميع بيانات المشتريات ومجال معرفات الحسابات
+    // 1. استخراج جميع بيانات المشتريات وتصفية معرفات الحسابات من أي قيم undefined أو فارغة
     const purchasesData = snap.docs.map((doc) => ({
       id: doc.id,
       ...doc.data(),
     }));
 
-    const accountIds = Array.from(new Set(purchasesData.map((p: any) => p.accountId)));
+    const accountIds = Array.from(
+      new Set(
+        purchasesData
+          .map((p: any) => p.accountId)
+          .filter((id) => id !== undefined && id !== null && id !== "")
+      )
+    );
 
-    // 2. جلب كل الحسابات بطلب واحد مجمع لتقليل وقت الانتظار
+    // إضافة أمان: إذا كانت مصفوفة الحسابات فارغة (مثلاً العميل اشترى Canva فقط)، ندمج البيانات ونرجعها مباشرة دون استعلام السيرفر
+    if (accountIds.length === 0) {
+      const purchases = purchasesData.map((p: any) => ({
+        id: p.id,
+        itemName: p.itemName,
+        createdAt: p.createdAt?.toMillis() || Date.now(),
+        email: "غير متوفر",
+        password: "غير متوفر",
+      }));
+      return { success: true, purchases };
+    }
+
+    // 2. جلب كل الحسابات بطلب واحد مجمع إذا كانت المصفوفة تحتوي على عناصر
     const accountsSnap = await adminDb
       .collection("capcutAccounts")
       .where("__name__", "in", accountIds.slice(0, 30))
