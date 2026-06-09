@@ -165,6 +165,13 @@ if (!admin.apps.length) {
       adminDb = admin.firestore();
       adminAuth = admin.auth();
     } else {
+      // إذا كنا في سيرفر الإنتاج الفعلي، نوقف السيرفر فوراً لإظهار المشكلة ولا نعتمد على بيانات وهمية
+      if (process.env.NODE_ENV === "production") {
+        throw new Error(
+          "CRITICAL SECURITY ERROR: Firebase Service Account credentials missing in production!"
+        );
+      }
+
       console.warn(
         "Firebase Admin credentials are unavailable. Using a local no-op fallback so the app can run without crashing."
       );

@@ -48,7 +48,9 @@ export const HomeHero = ({
               const res = await initiateClaimIntent(idToken, "daily_link_1");
               if (res.success) {
                 toast.success("تم التوجيه نحو الرابط!", { id: "intent-toast" });
-                window.location.href = "https://short-jambo.ink/Gate1";
+                // نقوم بقراءة الرابط المرتجع ديناميكياً من السيرفر إذا قمت بتهيئته لاحقاً، أو نضع هذا كـ Fallback آمن
+                const targetUrl = res.targetUrl || "https://short-jambo.ink/Gate1";
+                window.location.href = targetUrl;
               } else if (res.error === "VPN_DETECTED") {
                 toast.error(UI_MESSAGES.errors.vpnMessage, {
                   id: "intent-toast",

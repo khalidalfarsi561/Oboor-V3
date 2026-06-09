@@ -236,9 +236,12 @@ export async function getUserPurchases(idToken: string) {
     }
 
     // 2. جلب كل الحسابات بطلب واحد مجمع إذا كانت المصفوفة تحتوي على عناصر
+    // جلب أول 30 حساباً (تجنباً لقيود Firestore)، مع ترتيب مصفوفة المعرفات لضمان جلب الأحدث دائماً
+    const limitedAccountIds = accountIds.slice(0, 30);
+
     const accountsSnap = await adminDb
       .collection("capcutAccounts")
-      .where("__name__", "in", accountIds.slice(0, 30))
+      .where("__name__", "in", limitedAccountIds)
       .get();
 
     // 3. تحويل الحسابات إلى خريطة (Map) ليسهل قراءتها فوراً

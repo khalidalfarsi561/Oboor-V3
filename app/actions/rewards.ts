@@ -111,7 +111,7 @@ async function detectVPN(): Promise<boolean> {
 export async function initiateClaimIntent(
   idToken: string,
   linkId: string
-): Promise<{ success: boolean; error?: string }> {
+): Promise<{ success: boolean; targetUrl?: string; error?: string }> {
   if (!idToken || !linkId) return { success: false, error: "Missing parameters" };
 
   const userId = await getUidFromToken(idToken);

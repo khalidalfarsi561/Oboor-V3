@@ -53,7 +53,7 @@ const ELEMENT_ALLOWED_STYLE_PROPS: Record<string, string[]> = {
 export async function generateDesignPatch(
   idToken: string,
   elementId: string,
-  currentStyle: any,
+  currentStyle: DesignPatch,
   userPrompt: string
 ): Promise<{ success: boolean; patch?: Record<string, any>; error?: string }> {
   try {
