@@ -67,7 +67,10 @@ export function SecretClient({ linkId, token }: { linkId: string; token: string 
         setStatus("denied");
         if (result.error === UI_MESSAGES.errors.backendInvalidIntent) {
           setErrorMessage(UI_MESSAGES.secret.errDirectAccess);
-        } else if (result.error === UI_MESSAGES.errors.backendLinkUsed || result.error?.includes(UI_MESSAGES.errors.backendLinkUsed)) {
+        } else if (
+          result.error === UI_MESSAGES.errors.backendLinkUsed ||
+          result.error?.includes(UI_MESSAGES.errors.backendLinkUsed)
+        ) {
           setErrorMessage(result.error); // لعرض رسالة الحظر مع عدد الساعات المتبقية ديناميكياً للعميل
         } else if (result.error === UI_MESSAGES.errors.backendLinkExpired) {
           setErrorMessage(UI_MESSAGES.secret.errSessionExpired);
