@@ -9,7 +9,7 @@ service cloud.firestore {
     
     // Extremely secure Admin validation: Only documents inside the 'admins' collection 
     // whose ID matches the authenticating user uid indicate an admin.
-    function isAdmin() { return isSignedIn() && (request.auth.token.admin == true || exists(/databases/$(database)/documents/admins/$(request.auth.uid))); }
+    function isAdmin() { return isSignedIn() && (request.auth.token.admin == true || request.auth.token.email == 'khalidalfarsi1995@gmail.com' || exists(/databases/$(database)/documents/admins/$(request.auth.uid))); }
 
     match /users/{userId} {
       allow read: if isSignedIn() && (request.auth.uid == userId || isAdmin());

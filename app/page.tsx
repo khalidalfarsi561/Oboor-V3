@@ -11,8 +11,6 @@ export const metadata: Metadata = {
     "احصل على رصيد مجاني يومياً عن طريق تخطي الروابط المختصرة واسترداده فوراً في متجر المكافآت.",
 };
 
-export const revalidate = 0;
-
 // عمل كاش للإعدادات باستخدام التاج المخصص لها
 const getCachedSiteSettings = unstable_cache(
   async () => getPublicSiteSettings(),
@@ -20,10 +18,17 @@ const getCachedSiteSettings = unstable_cache(
   { tags: ["site-settings"] }
 );
 
+// عمل كاش ديناميكي للمخزون لتسريع الموقع وتقليل قراءات قاعدة البيانات
+const getCachedStoreStock = unstable_cache(
+  async () => getStoreStock(),
+  ["public-store-stock"],
+  { tags: ["store-items"] } // نفس التاج المستخدم في الـ Action تماماً
+);
+
 export default async function HomePage() {
   const [stockMap, siteSettings] = await Promise.all([
-    getStoreStock(),
-    getCachedSiteSettings(), // استدعاء النسخة المخبأة سريعة الاستجابة
+    getCachedStoreStock(),
+    getCachedSiteSettings(),
   ]);
 
   return (

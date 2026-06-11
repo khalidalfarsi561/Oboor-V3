@@ -165,24 +165,18 @@ if (!admin.apps.length) {
       adminDb = admin.firestore();
       adminAuth = admin.auth();
     } else {
-      // إذا كنا في سيرفر الإنتاج الفعلي، نوقف السيرفر فوراً لإظهار المشكلة ولا نعتمد على بيانات وهمية
-      if (process.env.NODE_ENV === "production") {
-        throw new Error(
-          "CRITICAL SECURITY ERROR: Firebase Service Account credentials missing in production!"
-        );
-      }
-
-      console.warn(
-        "Firebase Admin credentials are unavailable. Using a local no-op fallback so the app can run without crashing."
+      // إيقاف السيرفر فوراً في أي بيئة إنتاجية لحماية البيانات
+      throw new Error(
+        "CRITICAL SECURITY ERROR: Firebase Service Account credentials missing!"
       );
-
-      const mockFirestore = createMockFirestore();
-      adminDb = mockFirestore as unknown as admin.firestore.Firestore;
-      adminAuth = createMockAuth() as unknown as admin.auth.Auth;
     }
   } catch (error) {
     console.error("Firebase admin initialization error:", error);
-
+    // إذا كنا في الإنتاج، نمنع التطبيق من المتابعة بالبيانات الوهمية نهائياً
+    if (process.env.NODE_ENV === "production") {
+      throw error;
+    }
+    // يسمح بالوضع الوهمي فقط في بيئة التطوير المحلية (Local Development)
     const mockFirestore = createMockFirestore();
     adminDb = mockFirestore as unknown as admin.firestore.Firestore;
     adminAuth = createMockAuth() as unknown as admin.auth.Auth;
