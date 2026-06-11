@@ -65,7 +65,7 @@ export const AVAILABLE_LINKS: ShortLinkItem[] = [
   {
     id: "link_gate_3",
     name: "الرابط الثالث (موقع الاختصار الثالث)",
-    url: "https://linkjust.com/Gate",
-    provider: "LinkJust",
+    url: "https://nitro-link.com/zh3eS",
+    provider: "NitroLink",
   },
 ];
