@@ -71,7 +71,9 @@ export const HomeClaim = ({
                   <Loader2 className="h-6 w-6 animate-spin" />
                 </div>
               ) : (
-                UI_MESSAGES.home.claimButton
+                <span className="flex items-center justify-center pt-[3px] leading-none">
+                  {UI_MESSAGES.home.claimButton}
+                </span>
               )}
             </button>
           </div>

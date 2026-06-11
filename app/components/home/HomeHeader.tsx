@@ -97,7 +97,9 @@ export function HomeHeader({ user, balance, signIn, signOut, design }: HomeHeade
                           }}
                           className="flex w-full items-center justify-center gap-1 rounded-lg bg-red-50 px-3 py-2 text-center text-xs font-bold text-red-600 transition-colors hover:bg-red-100"
                         >
-                          تسجيل الخروج
+                          <span className="flex items-center justify-center pt-[3px] leading-none">
+                            تسجيل الخروج
+                          </span>
                         </button>
                       </motion.div>
                     </>

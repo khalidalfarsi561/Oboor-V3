@@ -159,7 +159,9 @@ export const StoreItems = memo(function StoreItems({
             onClick={fetchHistory}
             className="cursor-pointer rounded-xl bg-blue-50 px-4 py-2 text-xs font-bold text-blue-600 transition-all hover:bg-blue-100"
           >
-            {UI_MESSAGES.home.storeHistoryButton}
+            <span className="flex items-center justify-center pt-[2px] leading-none">
+              {UI_MESSAGES.home.storeHistoryButton}
+            </span>
           </button>
         )}
       </div>
