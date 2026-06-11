@@ -65,11 +65,13 @@ export function SecretClient({ linkId, token }: { linkId: string; token: string 
 
       if (!result.success || result.error) {
         setStatus("denied");
-        if (result.error?.includes("النقر على زر التخطي")) {
+        if (result.error === UI_MESSAGES.errors.backendInvalidIntent) {
           setErrorMessage(UI_MESSAGES.secret.errDirectAccess);
-        } else if (result.error?.includes("الرابط غير صالح حالياً")) {
+        } else if (result.error === UI_MESSAGES.errors.backendLinkUsed || result.error?.includes(UI_MESSAGES.errors.backendLinkUsed)) {
+          setErrorMessage(result.error); // لعرض رسالة الحظر مع عدد الساعات المتبقية ديناميكياً للعميل
+        } else if (result.error === UI_MESSAGES.errors.backendLinkExpired) {
           setErrorMessage(UI_MESSAGES.secret.errSessionExpired);
-        } else if (result.error?.includes("محاولة تجاوز")) {
+        } else if (result.error === UI_MESSAGES.errors.backendBypassBlock) {
           setErrorMessage(UI_MESSAGES.secret.errBypassDetected);
         } else if (result.error === "VPN_DETECTED") {
           setErrorMessage(UI_MESSAGES.secret.vpnMessage);
