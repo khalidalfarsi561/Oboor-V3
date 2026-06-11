@@ -8,10 +8,14 @@ export function ShortlinkCountdown() {
   const [countdown, setCountdown] = useState(10); // Updated to 10 seconds per task instructions
 
   useEffect(() => {
+    // قراءة الـ linkId الحالي من الرابط الفعلي المتواجد في المتصفح حالياً
+    const urlParams = new URLSearchParams(window.location.search);
+    const currentLinkId = urlParams.get("linkId") || "link_gate_1";
+
     // Optionally check local storage for bypass as per instruction "local storage bypass"
     const skip = localStorage.getItem("skip_shortlink_timer");
     if (process.env.NODE_ENV === "development" && skip === "true") {
-      router.push("/secret?linkId=daily_link_1");
+      router.push(`/secret?linkId=${currentLinkId}`);
       return;
     }
 
@@ -23,7 +27,7 @@ export function ShortlinkCountdown() {
       if (remaining <= 0) {
         clearInterval(interval);
         setCountdown(0);
-        router.push("/secret?linkId=daily_link_1");
+        router.push(`/secret?linkId=${currentLinkId}`);
       } else {
         setCountdown(remaining);
       }

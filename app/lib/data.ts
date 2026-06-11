@@ -37,3 +37,35 @@ export const ITEMS_MAP: Record<number, StoreItem> = ITEMS.reduce(
   },
   {} as Record<number, StoreItem>
 );
+
+// ========================
+// روابط الاختصار الديناميكية
+// ========================
+
+export type ShortLinkItem = {
+  id: string;
+  name: string;
+  url: string;
+  provider: string; // اسم موقع الاختصار لتمييزه
+};
+
+export const AVAILABLE_LINKS: ShortLinkItem[] = [
+  {
+    id: "link_gate_1",
+    name: "الرابط الأول (بوابة جامبو)",
+    url: "https://short-jambo.ink/Gate1",
+    provider: "Jambo",
+  },
+  {
+    id: "link_gate_2",
+    name: "الرابط الثاني (موقع الاختصار الثاني)",
+    url: "https://site-2.com/xyz123",
+    provider: "ShrinkMe",
+  },
+  {
+    id: "link_gate_3",
+    name: "الرابط الثالث (موقع الاختصار الثالث)",
+    url: "https://site-3.net/abc987",
+    provider: "LinkJust",
+  },
+];

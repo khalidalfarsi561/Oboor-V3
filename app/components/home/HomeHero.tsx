@@ -4,6 +4,7 @@ import React, { CSSProperties } from "react";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
 import { UI_MESSAGES } from "../../lib/messages";
+import { AVAILABLE_LINKS } from "../../lib/data"; // جلب الروابط الجديدة
 
 export const HomeHero = ({
   user,
@@ -24,7 +25,7 @@ export const HomeHero = ({
     <div className="pointer-events-none absolute -top-32 -left-32 h-96 w-96 rounded-full bg-blue-50 blur-3xl" />
 
     <div className="relative z-10 flex w-full flex-col items-center justify-between gap-8 text-center md:flex-row md:text-right">
-      <div>
+      <div className="w-full">
         <h2 className="font-inkbrush mb-3 text-xl font-bold tracking-tight text-slate-900 md:text-3xl">
           {UI_MESSAGES.home.heroTitle}
         </h2>
@@ -34,39 +35,50 @@ export const HomeHero = ({
           {UI_MESSAGES.home.heroDescEnd}
         </p>
 
-        <button
-          onClick={async () => {
-            if (!user) {
-              toast.error(UI_MESSAGES.errors.loginRequired);
-              signIn();
-              return;
-            }
-            toast.loading("جاري تحضير الرابط السري...", { id: "intent-toast" });
-            try {
-              const { initiateClaimIntent } = await import("../../actions/rewards");
-              const idToken = await user.getIdToken();
-              const res = await initiateClaimIntent(idToken, "daily_link_1");
-              if (res.success) {
-                toast.success("تم التوجيه نحو الرابط!", { id: "intent-toast" });
-                // نقوم بقراءة الرابط المرتجع ديناميكياً من السيرفر إذا قمت بتهيئته لاحقاً، أو نضع هذا كـ Fallback آمن
-                const targetUrl = res.targetUrl || "https://short-jambo.ink/Gate1";
-                window.location.href = targetUrl;
-              } else if (res.error === "VPN_DETECTED") {
-                toast.error(UI_MESSAGES.errors.vpnMessage, {
+        {/* توليد أزرار التخطي ديناميكياً لكل الروابط المتاحة */}
+        <div className="flex flex-wrap justify-center gap-4 md:justify-start">
+          {AVAILABLE_LINKS.map((link) => (
+            <button
+              key={link.id}
+              onClick={async () => {
+                if (!user) {
+                  toast.error(UI_MESSAGES.errors.loginRequired);
+                  signIn();
+                  return;
+                }
+                toast.loading(`جاري تحضير الرابط من ${link.provider}...`, {
                   id: "intent-toast",
-                  duration: 8000,
                 });
-              } else {
-                toast.error(res.error || "حدث خطأ في النظام.", { id: "intent-toast" });
-              }
-            } catch (e) {
-              toast.error(UI_MESSAGES.errors.internetError, { id: "intent-toast" });
-            }
-          }}
-          className="inline-flex w-full cursor-pointer items-center justify-center gap-2 rounded-2xl bg-blue-600 px-8 py-3.5 text-base font-semibold text-white shadow-lg shadow-blue-600/20 transition-all hover:-translate-y-0.5 hover:bg-blue-700 focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 focus-visible:outline-none sm:w-auto sm:py-4 sm:text-lg"
-        >
-          {UI_MESSAGES.home.heroButton}
-        </button>
+                try {
+                  const { initiateClaimIntent } = await import("../../actions/rewards");
+                  const idToken = await user.getIdToken();
+
+                  // نرسل الـ id الخاص بالرابط المحدد الذي ضغط عليه المستخدم حالياً
+                  const res = await initiateClaimIntent(idToken, link.id);
+                  if (res.success) {
+                    toast.success("تم التوجيه بنجاح!", { id: "intent-toast" });
+                    const targetUrl = res.targetUrl || link.url;
+                    window.location.href = targetUrl;
+                  } else if (res.error === "VPN_DETECTED") {
+                    toast.error(UI_MESSAGES.errors.vpnMessage, {
+                      id: "intent-toast",
+                      duration: 8000,
+                    });
+                  } else {
+                    toast.error(res.error || "حدث خطأ في النظام.", {
+                      id: "intent-toast",
+                    });
+                  }
+                } catch (e) {
+                  toast.error(UI_MESSAGES.errors.internetError, { id: "intent-toast" });
+                }
+              }}
+              className="cursor-pointer rounded-2xl bg-blue-600 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-blue-600/20 transition-all hover:-translate-y-0.5 hover:bg-blue-700 focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 focus-visible:outline-none"
+            >
+              تخطي {link.name} (+1$)
+            </button>
+          ))}
+        </div>
       </div>
     </div>
   </motion.section>
